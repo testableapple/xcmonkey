@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+
+require 'commander/import'
+require_relative '../lib/xcmonkey'
+require_relative '../lib/xcmonkey/describer'
+require_relative '../lib/xcmonkey/logger'
+require_relative '../lib/xcmonkey/driver'
+require_relative '../lib/xcmonkey/version'
+
+module Xcmonkey
+  program :version, VERSION
+  program :description, 'xcmonkey is a tool for doing randomised UI testing of iOS apps'
+
+  command :test do |c|
+    c.syntax = 'xcmonkey test [options]'
+    c.description = 'Runs monkey test'
+    c.option('-u', '--udid STRING', String, 'Set device UDID')
+    c.option('-b', '--bundle-id STRING', String, 'Set target bundle identifier')
+    c.option('-d', '--duration SECONDS', Integer, 'Test duration in seconds')
+    c.action do |args, options|
+      options.default(duration: 60)
+      params = {
+        udid: options.udid,
+        bundle_id: options.bundle_id,
+        duration: options.duration
+      }
+      Xcmonkey.new(params).run
+    end
+  end
+
+  command :describe do |c|
+    c.syntax = 'xcmonkey describe [options]'
+    c.description = 'Describes given point'
+    c.option('-u', '--udid STRING', String, 'Set device UDID')
+    c.option('-x', '--x STRING', 'Point `x` coordinate')
+    c.option('-y', '--y STRING', 'Point `y` coordinate')
+    c.action do |args, options|
+      params = {
+        udid: options.udid,
+        x: options.x,
+        y: options.y
+      }
+      Describer.new(params).run
+    end
+  end
+end

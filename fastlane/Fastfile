@@ -1,0 +1,26 @@
+skip_docs
+
+lane :release do
+  code_review
+  sh('bundle exec rake build')
+  gem_path = "pkg/xcmonkey-#{version}.gem"
+  sh("gem push ../#{gem_path}")
+  set_github_release(
+    repository_name: 'alteral/xcmonkey',
+    api_token: ENV.fetch("GITHUB_TOKEN", nil),
+    name: "xcmonkey v#{version}",
+    tag_name: "v#{version}",
+    description: "v#{version}",
+    commitish: git_branch,
+    upload_assets: [gem_path]
+  )
+end
+
+lane :code_review do
+  sh('bundle exec rake')
+end
+
+def version
+  version_path = '../lib/xcmonkey/version.rb'
+  File.read(version_path).scan(/\d+/).join('.')
+end

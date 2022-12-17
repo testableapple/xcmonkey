@@ -1,0 +1,29 @@
+name: Test
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  chat:
+    name: Checks
+    timeout-minutes: 15
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v3.1.0
+        with:
+          fetch-depth: '0'
+      - uses: actions/cache@v3
+        id: bundler-cache
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
+      - name: Bundler
+        run: |
+          gem install bundler
+          bundle config path vendor/bundle
+          bundle check || bundle install --jobs 4 --retry 3
+      - name: Rubocop
+        run: bundle exec rake
