@@ -3,17 +3,10 @@
 ## Requirements
 
 ```bash
-brew tap facebook/fb
-brew install idb-companion
+brew install facebook/fb/idb-companion
 ```
 
 ## Installation
-
-```bash
-brew install xcmonkey
-```
-
-or
 
 ```bash
 gem install xcmonkey
@@ -24,7 +17,7 @@ gem install xcmonkey
 ### Test
 
 ```bash
-xcmonkey test --udid "30694803-2018-460F-BBA6-97D7911A1AC0" --bundle-id "com.example.app"
+xcmonkey test --udid "20694801-2018-460F-BBA6-97D7911A1AC0" --bundle-id "com.example.app"
 ```
 
 ### Describe point

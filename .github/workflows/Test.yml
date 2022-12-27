@@ -25,5 +25,7 @@ jobs:
           gem install bundler
           bundle config path vendor/bundle
           bundle check || bundle install --jobs 4 --retry 3
-      - name: Rubocop
+      - name: Install driver
+        run: brew install facebook/fb/idb-companion
+      - name: Rake
         run: bundle exec rake
