@@ -1,0 +1,38 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  chat:
+    name: Automated Code Review
+    runs-on: macos-12
+    timeout-minutes: 15
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3.2.0
+
+      - uses: actions/setup-python@v4.4.0
+        with:
+          python-version: 3.11
+          cache: 'pip'
+
+      - run: bundle install
+
+      - run: brew install sonar-scanner
+
+      - run: brew install facebook/fb/idb-companion
+
+      - run: pip install -r requirements.txt
+
+      - run: bundle exec fastlane code_review
+
+      - run: bundle exec fastlane sonar_upload

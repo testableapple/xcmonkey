@@ -20,6 +20,34 @@ lane :code_review do
   sh('bundle exec rake')
 end
 
+lane :sonar_upload do
+  update_simplecov_report
+  sonar_options =
+    if ENV['GITHUB_EVENT_NAME'] == 'pull_request'
+      {
+        sonar_login: ENV.fetch('SONAR_TOKEN', nil),
+        pull_request_branch: ENV.fetch('GITHUB_HEAD_REF', nil),
+        pull_request_base: ENV.fetch('GITHUB_BASE_REF', nil),
+        pull_request_key: ENV.fetch('PR_NUMBER', nil)
+      }
+    else
+      {
+        sonar_login: ENV.fetch('SONAR_TOKEN', nil),
+        branch_name: ENV['BRANCH_NAME'] || git_branch,
+        project_version: version
+      }
+    end
+
+  sonar(sonar_options)
+end
+
+private_lane :update_simplecov_report do
+  coverage = JSON.parse(File.read('../coverage/.resultset.json'))["RSpec"]["coverage"]
+  transformed_values = coverage.transform_values { |l| l["lines"] }
+  new_format = { "RSpec" => { "coverage" => transformed_values, "timestamp" => Time.now.to_i } }
+  File.write('../coverage/.sonar.json', JSON.pretty_generate(new_format))
+end
+
 def version
   version_path = '../lib/xcmonkey/version.rb'
   File.read(version_path).scan(/\d+/).join('.')

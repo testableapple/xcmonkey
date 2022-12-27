@@ -23,6 +23,8 @@ class Driver
         tap(coordinates: { x: x, y: y })
       when :swipe
         swipe(start_coordinates: el1_coordinates, end_coordinates: el2_coordinates)
+      else
+        next
       end
       app_elements = describe_ui.shuffle
       Logger.error('App lost') if app_elements.include?(@home_tracker)
