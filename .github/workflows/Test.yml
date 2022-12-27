@@ -10,22 +10,21 @@ jobs:
     timeout-minutes: 15
     runs-on: macos-12
     steps:
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v3.2.0
         with:
           fetch-depth: '0'
-      - uses: actions/cache@v3
-        id: bundler-cache
+      - uses: actions/setup-python@v4.3.0
         with:
-          path: vendor/bundle
-          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-gems-
+          python-version: 3.8
+          cache: 'pip'
       - name: Bundler
         run: |
           gem install bundler
           bundle config path vendor/bundle
           bundle check || bundle install --jobs 4 --retry 3
       - name: Install driver
-        run: brew install facebook/fb/idb-companion
+        run: |
+          brew install facebook/fb/idb-companion
+          pip install -r requirements.txt
       - name: Rake
         run: bundle exec rake

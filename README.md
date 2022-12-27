@@ -4,6 +4,7 @@
 
 ```bash
 brew install facebook/fb/idb-companion
+pip3.6 install fb-idb
 ```
 
 ## Installation
