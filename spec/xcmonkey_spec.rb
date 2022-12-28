@@ -42,5 +42,14 @@ describe Xcmonkey do
       expect(Logger).to receive(:error).with(duration_error_msg)
       described_class.new(params)
     end
+
+    it 'verifies version' do
+      current_version = Gem::Version.new(Xcmonkey::VERSION)
+      expect(current_version).to be > Gem::Version.new('0.1.0')
+    end
+
+    it 'verifies gem name' do
+      expect(Xcmonkey::GEM_NAME).to eq('xcmonkey')
+    end
   end
 end

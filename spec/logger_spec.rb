@@ -33,4 +33,24 @@ describe Logger do
     expect { described_class.error(message, payload: payload) }
       .to raise_error(SystemExit) { |e| expect(e.status).to eq(1) }
   end
+
+  it 'verifies custom log without payload' do
+    color = :blue
+    time = Time.now
+    allow(Time).to receive(:now).and_return(time)
+    expected_output = "#{time.strftime('%k:%M:%S.%L')}: #{message}".colorize(color)
+    expect do
+      described_class.log(message, color: color, payload: nil)
+    end.to output("#{expected_output}\n\n").to_stdout
+  end
+
+  it 'verifies custom log with payload' do
+    color = :blue
+    time = Time.now
+    allow(Time).to receive(:now).and_return(time)
+    expected_output = "#{time.strftime('%k:%M:%S.%L')}: #{message}".colorize(color)
+    expect do
+      described_class.log(message, color: color, payload: payload)
+    end.to output("#{expected_output} #{payload.colorize(:light_green)}\n\n").to_stdout
+  end
 end

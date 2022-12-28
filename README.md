@@ -24,15 +24,21 @@ pip3.6 install fb-idb
 gem install xcmonkey
 ```
 
+If you prefer to use [bundler](https://bundler.io/), add the following line to your `Gemfile`:
+
+```ruby
+gem 'xcmonkey'
+```
+
 ## Usage
 
-### Test
+### To run a stress test
 
 ```bash
-$ xcmonkey test --udid "413EA256-CFFB-4312-94A6-12592BEE4CBA" --bundle-id "com.apple.mobilesafari"
+$ xcmonkey test --udid "413EA256-CFFB-4312-94A6-12592BEE4CBA" --bundle-id "com.apple.Maps" --duration 100
 12:44:19.343: Device info: iPhone 14 Pro | 413EA256-CFFB-4312-94A6-12592BEE4CBA | Booted | simulator | iOS 16.2 | x86_64 | /tmp/idb/413EA256-CFFB-4312-94A6-12592BEE4CBA_companion.sock
 
-12:44:22.550: App info: com.apple.mobilesafari | MobileSafari | system | x86_64, arm64 | Running | Not Debuggable | pid=43398
+12:44:22.550: App info: com.apple.Maps | Maps | system | arm64, x86_64 | Running | Not Debuggable | pid=74636
 
 12:44:23.203: Tap: {
   "x": 53,
@@ -53,33 +59,31 @@ $ xcmonkey test --udid "413EA256-CFFB-4312-94A6-12592BEE4CBA" --bundle-id "com.a
 }
 ```
 
-### Describe point
+### To describe the required point
 
 ```bash
-$ xcmonkey describe -x 125 -y 760 --udid "413EA256-CFFB-4312-94A6-12592BEE4CBA"
-12:41:03.840: Device info: iPhone 14 Pro | 413EA256-CFFB-4312-94A6-12592BEE4CBA | Booted | simulator | iOS 16.2 | x86_64 | /tmp/idb/413EA256-CFFB-4312-94A6-12592BEE4CBA_companion.sock
+$ xcmonkey describe -x 20 -y 625 --udid "413EA256-CFFB-4312-94A6-12592BEE4CBA"
+20:05:20.212: Device info: iPhone 14 Pro | 413EA256-CFFB-4312-94A6-12592BEE4CBA | Booted | simulator | iOS 16.2 | x86_64 | /tmp/idb/413EA256-CFFB-4312-94A6-12592BEE4CBA_companion.sock
 
-12:41:05.342: x:125 y:760 point info: {
-  "AXFrame": "{{120, 759}, {64, 64}}",
-  "AXUniqueId": "Safari",
+20:05:21.713: x:20 y:625 point info: {
+  "AXFrame": "{{19, 624.33333333333337}, {86, 130.66666666666663}}",
+  "AXUniqueId": "ShortcutsRowCell",
   "frame": {
-    "y": 759,
-    "x": 120,
-    "width": 64,
-    "height": 64
+    "y": 624.3333333333334,
+    "x": 19,
+    "width": 86,
+    "height": 130.66666666666663
   },
   "role_description": "button",
-  "AXLabel": "Safari",
+  "AXLabel": "Home",
   "content_required": false,
   "type": "Button",
   "title": null,
-  "help": "Double tap to open",
+  "help": null,
   "custom_actions": [
-    "Edit mode",
-    "Today",
-    "App Library"
+
   ],
-  "AXValue": "",
+  "AXValue": "Add",
   "enabled": true,
   "role": "AXButton",
   "subrole": null
