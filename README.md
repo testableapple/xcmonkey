@@ -29,13 +29,61 @@ gem install xcmonkey
 ### Test
 
 ```bash
-xcmonkey test --udid "20694801-2018-460F-BBA6-97D7911A1AC0" --bundle-id "com.example.app"
+$ xcmonkey test --udid "413EA256-CFFB-4312-94A6-12592BEE4CBA" --bundle-id "com.apple.mobilesafari"
+12:44:19.343: Device info: iPhone 14 Pro | 413EA256-CFFB-4312-94A6-12592BEE4CBA | Booted | simulator | iOS 16.2 | x86_64 | /tmp/idb/413EA256-CFFB-4312-94A6-12592BEE4CBA_companion.sock
+
+12:44:22.550: App info: com.apple.mobilesafari | MobileSafari | system | x86_64, arm64 | Running | Not Debuggable | pid=43398
+
+12:44:23.203: Tap: {
+  "x": 53,
+  "y": 749
+}
+
+12:44:23.511: Swipe: {
+  "x": 196,
+  "y": 426
+} => {
+  "x": 143,
+  "y": 447
+}
+
+12:44:24.355: Tap: {
+  "x": 143,
+  "y": 323
+}
 ```
 
 ### Describe point
 
 ```bash
-xcmonkey describe -x 10 -y 10 --udid "20694801-2018-460F-BBA6-97D7911A1AC0"
+$ xcmonkey describe -x 125 -y 760 --udid "413EA256-CFFB-4312-94A6-12592BEE4CBA"
+12:41:03.840: Device info: iPhone 14 Pro | 413EA256-CFFB-4312-94A6-12592BEE4CBA | Booted | simulator | iOS 16.2 | x86_64 | /tmp/idb/413EA256-CFFB-4312-94A6-12592BEE4CBA_companion.sock
+
+12:41:05.342: x:125 y:760 point info: {
+  "AXFrame": "{{120, 759}, {64, 64}}",
+  "AXUniqueId": "Safari",
+  "frame": {
+    "y": 759,
+    "x": 120,
+    "width": 64,
+    "height": 64
+  },
+  "role_description": "button",
+  "AXLabel": "Safari",
+  "content_required": false,
+  "type": "Button",
+  "title": null,
+  "help": "Double tap to open",
+  "custom_actions": [
+    "Edit mode",
+    "Today",
+    "App Library"
+  ],
+  "AXValue": "",
+  "enabled": true,
+  "role": "AXButton",
+  "subrole": null
+}
 ```
 
 ## Code of Conduct

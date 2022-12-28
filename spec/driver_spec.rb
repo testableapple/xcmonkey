@@ -85,6 +85,14 @@ describe Driver do
     expect(actual_coordinates).to eq(expected_coordinates)
   end
 
+  it 'verifies that app can be launched' do
+    expect(Logger).not_to receive(:error)
+    expect(Logger).to receive(:info)
+    driver.boot_simulator
+    driver.terminate_app
+    expect { driver.launch_app }.not_to raise_error
+  end
+
   it 'verifies that simulator was not booted' do
     driver.shutdown_simulator
     error_message = "Failed to boot #{udid}"

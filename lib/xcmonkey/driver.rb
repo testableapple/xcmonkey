@@ -48,6 +48,7 @@ class Driver
 
   def launch_app
     `idb launch --udid #{udid} #{bundle_id}`
+    wait_until_app_launched
   end
 
   def terminate_app
@@ -123,5 +124,17 @@ class Driver
       !el['AXUniqueId'].nil? && !el['AXUniqueId'].empty? && el['type'] == 'Button'
     end
     @home_tracker
+  end
+
+  def wait_until_app_launched
+    app_info = nil
+    current_time = Time.now
+    while app_info.nil? && Time.now < current_time + 5
+      app_info = list_apps.split("\n").detect do |app|
+        app =~ /#{bundle_id}.*Running/
+      end
+    end
+    Logger.error("Can't run the app #{bundle_id}") if app_info.nil?
+    Logger.info('App info:', payload: app_info)
   end
 end
