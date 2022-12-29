@@ -11,11 +11,9 @@
 
 ## Description
 
-*xcmonkey* is a tool for doing randomised UI testing of iOS apps.
+*xcmonkey* is a tool for doing randomised UI testing of iOS apps. It's inspired by and has similar goals to [*monkey*](https://developer.android.com/studio/test/monkey) on Android.
 
-It is inspired by and has similar goals to Android [monkey](https://developer.android.com/studio/test/monkey).
-
-*xcmonkey* uses [idb](https://fbidb.io) as a driver that's why it's quite smart and can do a lot of things, such as taps, swipes and presses. Because *xcmonkey* has access to the screen hierarchy, it can either do things blindly (like tapping on random points) or precisely (like tapping on the existing elements).
+Under the hood, *xcmonkey* uses [iOS Development Bridge](https://fbidb.io/) as a driver, that's why it's pretty smart and can do a lot of things, such as taps, swipes and presses. All that comes «pseudo-random» because it has access to the screen hierarchy, and so can either do actions blindly (like tapping on random points) or precisely (like tapping on the existing elements).
 
 ## Requirements
 
@@ -30,7 +28,7 @@ pip3.6 install fb-idb
 gem install xcmonkey
 ```
 
-If you prefer to use [bundler](https://bundler.io/), add the following line to your `Gemfile`:
+If you prefer to use [*bundler*](https://bundler.io/), add the following line to your `Gemfile`:
 
 ```ruby
 gem 'xcmonkey'
@@ -72,13 +70,13 @@ $ xcmonkey describe -x 20 -y 625 --udid "413EA256-CFFB-4312-94A6-12592BEE4CBA"
 20:05:20.212: Device info: iPhone 14 Pro | 413EA256-CFFB-4312-94A6-12592BEE4CBA | Booted | simulator | iOS 16.2 | x86_64 | /tmp/idb/413EA256-CFFB-4312-94A6-12592BEE4CBA_companion.sock
 
 20:05:21.713: x:20 y:625 point info: {
-  "AXFrame": "{{19, 624.33333333333337}, {86, 130.66666666666663}}",
+  "AXFrame": "{{19, 624.3}, {86, 130.6}}",
   "AXUniqueId": "ShortcutsRowCell",
   "frame": {
-    "y": 624.3333333333334,
+    "y": 624.3,
     "x": 19,
     "width": 86,
-    "height": 130.66666666666663
+    "height": 130.6
   },
   "role_description": "button",
   "AXLabel": "Home",
