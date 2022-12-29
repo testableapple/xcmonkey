@@ -13,7 +13,7 @@ jobs:
   chat:
     name: Automated Code Review
     runs-on: macos-12
-    timeout-minutes: 15
+    timeout-minutes: 30
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

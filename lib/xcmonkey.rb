@@ -21,13 +21,16 @@ module Xcmonkey
 			driver.ensure_device_exists
 			driver.ensure_app_installed
 			driver.terminate_app
-			driver.open_home_screen(return_tracker: true)
+			driver.open_home_screen(with_tracker: true)
 			driver.launch_app
 			driver.monkey_test(gestures)
     end
 
 		def gestures
-			[:precise_tap, :blind_tap, :swipe]
+			taps = [:precise_tap, :blind_tap] * 10
+			swipes = [:precise_swipe, :blind_swipe] * 5
+			presses = [:precise_press, :blind_press]
+			taps + swipes + presses
 		end
 
 		def ensure_required_params(params)

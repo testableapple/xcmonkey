@@ -9,7 +9,13 @@
   <a href="/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg?style=flat" /></a>
 </p>
 
+## Description
+
 *xcmonkey* is a tool for doing randomised UI testing of iOS apps.
+
+It is inspired by and has similar goals to Android [monkey](https://developer.android.com/studio/test/monkey).
+
+*xcmonkey* uses [idb](https://fbidb.io) as a driver that's why it's quite smart and can do a lot of things, such as taps, swipes and presses. Because *xcmonkey* has access to the screen hierarchy, it can either do things blindly (like tapping on random points) or precisely (like tapping on the existing elements).
 
 ## Requirements
 
@@ -45,7 +51,7 @@ $ xcmonkey test --udid "413EA256-CFFB-4312-94A6-12592BEE4CBA" --bundle-id "com.a
   "y": 749
 }
 
-12:44:23.511: Swipe: {
+12:44:23.511: Swipe (0.5s): {
   "x": 196,
   "y": 426
 } => {
@@ -53,7 +59,7 @@ $ xcmonkey test --udid "413EA256-CFFB-4312-94A6-12592BEE4CBA" --bundle-id "com.a
   "y": 447
 }
 
-12:44:24.355: Tap: {
+12:44:24.355: Press (1.2s): {
   "x": 143,
   "y": 323
 }

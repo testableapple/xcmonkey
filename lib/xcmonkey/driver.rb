@@ -18,11 +18,23 @@ class Driver
       when :precise_tap
         tap(coordinates: el1_coordinates)
       when :blind_tap
-        x = (el1_coordinates[:x] - el2_coordinates[:x]).abs
-        y = (el1_coordinates[:y] - el2_coordinates[:y]).abs
-        tap(coordinates: { x: x, y: y })
-      when :swipe
-        swipe(start_coordinates: el1_coordinates, end_coordinates: el2_coordinates)
+        tap(coordinates: random_coordinates)
+      when :precise_press
+        press(coordinates: el1_coordinates, duration: press_duration)
+      when :blind_press
+        press(coordinates: random_coordinates, duration: press_duration)
+      when :precise_swipe
+        swipe(
+          start_coordinates: el1_coordinates,
+          end_coordinates: el2_coordinates,
+          duration: swipe_duration
+        )
+      when :blind_swipe
+        swipe(
+          start_coordinates: random_coordinates,
+          end_coordinates: random_coordinates,
+          duration: swipe_duration
+        )
       else
         next
       end
@@ -31,9 +43,9 @@ class Driver
     end
   end
 
-  def open_home_screen(return_tracker: false)
+  def open_home_screen(with_tracker: false)
     `idb ui button --udid #{udid} HOME`
-    detect_home_unique_element if return_tracker
+    detect_home_unique_element if with_tracker
   end
 
   def describe_ui
@@ -57,7 +69,7 @@ class Driver
 
   def boot_simulator
     `idb boot #{udid}`
-    ensure_simulator_was_booted
+    Logger.error("Failed to boot #{udid}") if device_info['state'] != 'Booted'
   end
 
   def shutdown_simulator
@@ -84,11 +96,6 @@ class Driver
     boot_simulator if device.include?('simulator')
   end
 
-  def ensure_simulator_was_booted
-    sim = list_booted_simulators.detect { |target| target.include?(udid) }
-    Logger.error("Failed to boot #{udid}") if sim.nil?
-  end
-
   def list_apps
     `idb list-apps --udid #{udid}`
   end
@@ -98,18 +105,56 @@ class Driver
     `idb ui tap --udid #{udid} #{coordinates[:x]} #{coordinates[:y]}`
   end
 
-  def swipe(start_coordinates:, end_coordinates:)
-    Logger.info('Swipe:', payload: "#{JSON.pretty_generate(start_coordinates)} => #{JSON.pretty_generate(end_coordinates)}")
+  def press(coordinates:, duration:)
+    Logger.info("Press (#{duration}s):", payload: JSON.pretty_generate(coordinates))
+    `idb ui tap --udid #{udid} --duration #{duration} #{coordinates[:x]} #{coordinates[:y]}`
+  end
+
+  def swipe(start_coordinates:, end_coordinates:, duration:)
+    Logger.info(
+      "Swipe (#{duration}s):",
+      payload: "#{JSON.pretty_generate(start_coordinates)} => #{JSON.pretty_generate(end_coordinates)}"
+    )
     coordinates = "#{start_coordinates[:x]} #{start_coordinates[:y]} #{end_coordinates[:x]} #{end_coordinates[:y]}"
-    `idb ui swipe --udid #{udid} --duration 0.5 #{coordinates}`
+    `idb ui swipe --udid #{udid} --duration #{duration} #{coordinates}`
   end
 
   def central_coordinates(element)
     frame = element['frame']
+    x = (frame['x'] + (frame['width'] / 2)).abs.to_i
+    y = (frame['y'] + (frame['height'] / 2)).abs.to_i
     {
-      x: (frame['x'] + (frame['width'] / 2)).to_i,
-      y: (frame['y'] + (frame['height'] / 2)).to_i
+      x: x > screen_size[:width].to_i ? rand(0..screen_size[:width].to_i) : x,
+      y: y > screen_size[:height].to_i ? rand(0..screen_size[:height].to_i) : y
     }
+  end
+
+  def random_coordinates
+    {
+      x: rand(0..screen_size[:width].to_i),
+      y: rand(0..screen_size[:height].to_i)
+    }
+  end
+
+  def device_info
+    @device_info ||= JSON.parse(`idb describe --udid #{udid} --json`)
+    @device_info
+  end
+
+  def screen_size
+    screen_dimensions = device_info['screen_dimensions']
+    {
+      width: screen_dimensions['width_points'],
+      height: screen_dimensions['height_points']
+    }
+  end
+
+  def swipe_duration
+    rand(0.1..0.7).ceil(1)
+  end
+
+  def press_duration
+    rand(0.5..1.5).ceil(1)
   end
 
   private

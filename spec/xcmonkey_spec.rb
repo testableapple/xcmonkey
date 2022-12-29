@@ -5,7 +5,10 @@ describe Xcmonkey do
 
     it 'verifies gestures' do
       gestures = described_class.new(params).gestures
-      expect(gestures) =~ [:swipe, :precise_tap, :blind_tap]
+      taps = [:precise_tap, :blind_tap] * 10
+      swipes = [:precise_swipe, :blind_swipe] * 5
+      presses = [:precise_press, :blind_press]
+      expect(gestures) =~ presses + taps + swipes
     end
 
     it 'verifies required params' do

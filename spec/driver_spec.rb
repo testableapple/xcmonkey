@@ -6,8 +6,7 @@ describe Driver do
   it 'verifies that sumulator was booted' do
     error_message = "Failed to boot #{udid}"
     expect(Logger).not_to receive(:error).with(error_message, payload: nil)
-    expect(driver).to receive(:ensure_simulator_was_booted)
-    driver.boot_simulator
+    expect { driver.boot_simulator }.not_to raise_error
   end
 
   it 'verifies that there are booted simulators' do
@@ -24,8 +23,14 @@ describe Driver do
 
   it 'verifies that home screen can be opened' do
     driver.boot_simulator
-    home_tracker = driver.open_home_screen(return_tracker: true)
+    home_tracker = driver.open_home_screen(with_tracker: true)
     expect(home_tracker).not_to be_empty
+  end
+
+  it 'verifies that home screen can be opened without tracker' do
+    driver.boot_simulator
+    home_tracker = driver.open_home_screen(with_tracker: false)
+    expect(home_tracker).to be_nil
   end
 
   it 'verifies that list of targets can be showed' do
@@ -85,6 +90,38 @@ describe Driver do
     expect(actual_coordinates).to eq(expected_coordinates)
   end
 
+  it 'verifies that device info can be for booted simulator' do
+    driver.boot_simulator
+    expect(driver.device_info).not_to be_empty
+  end
+
+  it 'verifies that device info can be for not booted simulator' do
+    driver.shutdown_simulator
+    expect(driver.device_info).not_to be_empty
+  end
+
+  it 'verifies that screen size can be found' do
+    driver.boot_simulator
+    screen_size = driver.screen_size
+    expect(screen_size[:width]).to be > 0
+    expect(screen_size[:height]).to be > 0
+  end
+
+  it 'verifies that random coordinates can be found' do
+    driver.boot_simulator
+    coordinates = driver.random_coordinates
+    expect(coordinates[:x]).to be > 0
+    expect(coordinates[:y]).to be > 0
+  end
+
+  it 'verifies swipe duration' do
+    expect(driver.swipe_duration).to be_between(0.1, 0.7)
+  end
+
+  it 'verifies press duration' do
+    expect(driver.press_duration).to be_between(0.5, 1.5)
+  end
+
   it 'verifies that app can be launched' do
     expect(Logger).not_to receive(:error)
     expect(Logger).to receive(:info)
@@ -93,10 +130,35 @@ describe Driver do
     expect { driver.launch_app }.not_to raise_error
   end
 
+  it 'verifies tap' do
+    driver.boot_simulator
+    coordinates = { x: 1, y: 1 }
+    expect(Logger).to receive(:info).with('Tap:', payload: JSON.pretty_generate(coordinates))
+    driver.tap(coordinates: coordinates)
+  end
+
+  it 'verifies press' do
+    driver.boot_simulator
+    duration = 0.5
+    coordinates = { x: 1, y: 1 }
+    expect(Logger).to receive(:info).with("Press (#{duration}s):", payload: JSON.pretty_generate(coordinates))
+    driver.press(coordinates: coordinates, duration: duration)
+  end
+
+  it 'verifies swipe' do
+    driver.boot_simulator
+    duration = 0.5
+    start_coordinates = { x: 1, y: 1 }
+    end_coordinates = { x: 2, y: 2 }
+    expect(Logger).to receive(:info).with("Swipe (#{duration}s):", payload: "#{JSON.pretty_generate(start_coordinates)} => #{JSON.pretty_generate(end_coordinates)}")
+    driver.swipe(start_coordinates: start_coordinates, end_coordinates: end_coordinates, duration: duration)
+  end
+
   it 'verifies that simulator was not booted' do
     driver.shutdown_simulator
     error_message = "Failed to boot #{udid}"
+    allow(driver).to receive(:device_info).and_return({ 'state' => 'Unknown' })
     expect(Logger).to receive(:log).with(error_message, color: :light_red, payload: nil)
-    expect { driver.ensure_simulator_was_booted }.to raise_error(SystemExit) { |e| expect(e.status).to eq(1) }
+    expect { driver.boot_simulator }.to raise_error(SystemExit) { |e| expect(e.status).to eq(1) }
   end
 end
