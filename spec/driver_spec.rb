@@ -122,6 +122,26 @@ describe Driver do
     expect(driver.press_duration).to be_between(0.5, 1.5)
   end
 
+  it 'verifies that simulator keyboard can be enabled' do
+    allow(driver).to receive(:is_simulator_keyboard_enabled?).and_return(false)
+    driver = described_class.new(udid: udid, bundle_id: bundle_id, enable_simulator_keyboard: true)
+    expect(driver).to receive(:shutdown_simulator)
+    driver.configure_simulator_keyboard
+    keyboard_state = `defaults read com.apple.iphonesimulator`.split("\n").grep(/ConnectHardwareKeyboard/)
+    expect(keyboard_state).not_to be_empty
+    expect(keyboard_state.first).to include('0')
+  end
+
+  it 'verifies that simulator keyboard can be disabled' do
+    allow(driver).to receive(:is_simulator_keyboard_enabled?).and_return(true)
+    driver = described_class.new(udid: udid, bundle_id: bundle_id, enable_simulator_keyboard: false)
+    expect(driver).to receive(:shutdown_simulator)
+    driver.configure_simulator_keyboard
+    keyboard_state = `defaults read com.apple.iphonesimulator`.split("\n").grep(/ConnectHardwareKeyboard/)
+    expect(keyboard_state).not_to be_empty
+    expect(keyboard_state.first).to include('1')
+  end
+
   it 'verifies that app can be launched' do
     expect(Logger).not_to receive(:error)
     expect(Logger).to receive(:info)

@@ -16,13 +16,15 @@ module Xcmonkey
     c.description = 'Runs monkey test'
     c.option('-u', '--udid STRING', String, 'Set device UDID')
     c.option('-b', '--bundle-id STRING', String, 'Set target bundle identifier')
-    c.option('-d', '--duration SECONDS', Integer, 'Test duration in seconds')
+    c.option('-d', '--duration SECONDS', Integer, 'Test duration in seconds. Defaults to `60`')
+    c.option('-k', '--enable-simulator-keyboard', 'Should simulator keyboard be enabled? Defaults to `true`')
     c.action do |args, options|
-      options.default(duration: 60)
+      options.default(duration: 60, enable_simulator_keyboard: true)
       params = {
         udid: options.udid,
         bundle_id: options.bundle_id,
-        duration: options.duration
+        duration: options.duration,
+        simulator_keyboard: options.enable_simulator_keyboard
       }
       Xcmonkey.new(params).run
     end

@@ -15,7 +15,7 @@
 
 Under the hood, *xcmonkey* uses [iOS Development Bridge](https://fbidb.io/) as a driver, that's why it's pretty smart and can do a lot of things, such as taps, swipes and presses. All that comes «pseudo-random» because it has access to the screen hierarchy, and so can either do actions blindly (like tapping on random points) or precisely (like tapping on the existing elements).
 
-## Requirements
+## Prerequisites
 
 ```bash
 brew install facebook/fb/idb-companion

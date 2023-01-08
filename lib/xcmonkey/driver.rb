@@ -1,10 +1,11 @@
 class Driver
-  attr_accessor :udid, :bundle_id, :duration
+  attr_accessor :udid, :bundle_id, :duration, :enable_simulator_keyboard
 
   def initialize(params)
     self.udid = params[:udid]
     self.bundle_id = params[:bundle_id]
     self.duration = params[:duration]
+    self.enable_simulator_keyboard = params[:enable_simulator_keyboard]
     ensure_driver_installed
   end
 
@@ -76,6 +77,12 @@ class Driver
     `idb shutdown #{udid}`
   end
 
+  def configure_simulator_keyboard
+    shutdown_simulator
+    keyboard_status = enable_simulator_keyboard ? 0 : 1
+    `defaults write com.apple.iphonesimulator ConnectHardwareKeyboard #{keyboard_status}`
+  end
+
   def list_targets
     @list_targets ||= `idb list-targets`.split("\n")
     @list_targets
@@ -92,8 +99,12 @@ class Driver
   def ensure_device_exists
     device = list_targets.detect { |target| target.include?(udid) }
     Logger.error("Can't find device #{udid}") if device.nil?
+
     Logger.info('Device info:', payload: device)
-    boot_simulator if device.include?('simulator')
+    if device.include?('simulator')
+      configure_simulator_keyboard
+      boot_simulator
+    end
   end
 
   def list_apps
