@@ -1,7 +1,8 @@
 describe Driver do
   let(:udid) { `xcrun simctl list | grep " iPhone 14 Pro Max"`.split("\n")[0].split('(')[1].split(')')[0] }
   let(:bundle_id) { 'com.apple.Maps' }
-  let(:driver) { described_class.new(udid: udid, bundle_id: bundle_id) }
+  let(:driver) { described_class.new(udid: udid, bundle_id: bundle_id, session_path: Dir.pwd) }
+  let(:driver_with_session) { described_class.new(udid: udid, bundle_id: bundle_id, session_actions: [{ type: 'tap', x: 0, y: 0 }]) }
 
   it 'verifies that sumulator was booted' do
     error_message = "Failed to boot #{udid}"
@@ -150,28 +151,64 @@ describe Driver do
     expect { driver.launch_app }.not_to raise_error
   end
 
-  it 'verifies tap' do
+  it 'verifies tap in new session' do
     driver.boot_simulator
     coordinates = { x: 1, y: 1 }
     expect(Logger).to receive(:info).with('Tap:', payload: JSON.pretty_generate(coordinates))
     driver.tap(coordinates: coordinates)
+    expect(driver.instance_variable_get(:@session)[:actions]).not_to be_empty
   end
 
-  it 'verifies press' do
+  it 'verifies tap in old session' do
+    driver_with_session.boot_simulator
+    coordinates = { x: 1, y: 1 }
+    expect(Logger).to receive(:info).with('Tap:', payload: JSON.pretty_generate(coordinates))
+    driver_with_session.tap(coordinates: coordinates)
+    expect(driver_with_session.instance_variable_get(:@session)[:actions]).to be_empty
+  end
+
+  it 'verifies press in new session' do
     driver.boot_simulator
     duration = 0.5
     coordinates = { x: 1, y: 1 }
     expect(Logger).to receive(:info).with("Press (#{duration}s):", payload: JSON.pretty_generate(coordinates))
     driver.press(coordinates: coordinates, duration: duration)
+    expect(driver.instance_variable_get(:@session)[:actions]).not_to be_empty
   end
 
-  it 'verifies swipe' do
+  it 'verifies press in old session' do
+    driver_with_session.boot_simulator
+    duration = 0.5
+    coordinates = { x: 1, y: 1 }
+    expect(Logger).to receive(:info).with("Press (#{duration}s):", payload: JSON.pretty_generate(coordinates))
+    driver_with_session.press(coordinates: coordinates, duration: duration)
+    expect(driver_with_session.instance_variable_get(:@session)[:actions]).to be_empty
+  end
+
+  it 'verifies swipe in new session' do
     driver.boot_simulator
     duration = 0.5
     start_coordinates = { x: 1, y: 1 }
     end_coordinates = { x: 2, y: 2 }
     expect(Logger).to receive(:info).with("Swipe (#{duration}s):", payload: "#{JSON.pretty_generate(start_coordinates)} => #{JSON.pretty_generate(end_coordinates)}")
     driver.swipe(start_coordinates: start_coordinates, end_coordinates: end_coordinates, duration: duration)
+    expect(driver.instance_variable_get(:@session)[:actions]).not_to be_empty
+  end
+
+  it 'verifies swipe in old session' do
+    driver_with_session.boot_simulator
+    duration = 0.5
+    start_coordinates = { x: 1, y: 1 }
+    end_coordinates = { x: 2, y: 2 }
+    expect(Logger).to receive(:info).with("Swipe (#{duration}s):", payload: "#{JSON.pretty_generate(start_coordinates)} => #{JSON.pretty_generate(end_coordinates)}")
+    driver_with_session.swipe(start_coordinates: start_coordinates, end_coordinates: end_coordinates, duration: duration)
+    expect(driver_with_session.instance_variable_get(:@session)[:actions]).to be_empty
+  end
+
+  it 'verifies that session can be saved' do
+    expect(File).to receive(:write)
+    driver.instance_variable_set(:@session, { params: {}, actions: [] })
+    driver.save_session
   end
 
   it 'verifies that simulator was not booted' do

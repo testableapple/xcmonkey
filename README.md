@@ -11,7 +11,7 @@
 
 ## Description
 
-*xcmonkey* is a tool for doing randomised UI testing of iOS apps. It's inspired by and has similar goals to [*monkey*](https://developer.android.com/studio/test/monkey) on Android.
+*xcmonkey* is a tool for doing stress testing of iOS apps. It's inspired by and has similar goals to [*monkey*](https://developer.android.com/studio/test/monkey) on Android.
 
 Under the hood, *xcmonkey* uses [iOS Development Bridge](https://fbidb.io/) as a driver, that's why it's pretty smart and can do a lot of things, such as taps, swipes and presses. All that comes «pseudo-random» because it has access to the screen hierarchy, and so can either do actions blindly (like tapping on random points) or precisely (like tapping on the existing elements).
 
@@ -58,6 +58,33 @@ $ xcmonkey test --udid "413EA256-CFFB-4312-94A6-12592BEE4CBA" --bundle-id "com.a
 }
 
 12:44:24.355: Press (1.2s): {
+  "x": 143,
+  "y": 323
+}
+```
+
+### To repeat the stress test from generated session
+
+```bash
+$ xcmonkey repeat --session-path "./xcmonkey-session.json"
+12:48:13.333: Device info: iPhone 14 Pro | 413EA256-CFFB-4312-94A6-12592BEE4CBA | Booted | simulator | iOS 16.2 | x86_64 | /tmp/idb/413EA256-CFFB-4312-94A6-12592BEE4CBA_companion.sock
+
+12:48:16.542: App info: com.apple.Maps | Maps | system | arm64, x86_64 | Running | Not Debuggable | pid=73416
+
+12:48:20.195: Tap: {
+  "x": 53,
+  "y": 749
+}
+
+12:48:20.404: Swipe (0.5s): {
+  "x": 196,
+  "y": 426
+} => {
+  "x": 143,
+  "y": 447
+}
+
+12:48:21.155: Press (1.2s): {
   "x": 143,
   "y": 323
 }

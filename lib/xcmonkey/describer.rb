@@ -1,9 +1,8 @@
 class Describer
-	attr_accessor :udid, :x, :y, :driver
+	attr_accessor :x, :y, :driver
 
 	def initialize(params)
 		ensure_required_params(params)
-		self.udid = params[:udid]
 		self.x = params[:x]
 		self.y = params[:y]
 		self.driver = Driver.new(params)

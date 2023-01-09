@@ -39,3 +39,6 @@ DerivedData
 
 # Sonar
 .scannerwork
+
+# Cache
+xcmonkey-session.json
