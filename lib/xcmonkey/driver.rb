@@ -1,18 +1,30 @@
 class Driver
-  attr_accessor :udid, :bundle_id, :duration, :enable_simulator_keyboard
+  attr_accessor :udid, :bundle_id, :enable_simulator_keyboard, :session_duration, :session_path, :session_actions
 
   def initialize(params)
     self.udid = params[:udid]
     self.bundle_id = params[:bundle_id]
-    self.duration = params[:duration]
+    self.session_duration = params[:duration]
+    self.session_path = params[:session_path]
     self.enable_simulator_keyboard = params[:enable_simulator_keyboard]
+    self.session_actions = params[:session_actions]
+    @session = { params: params, actions: [] }
     ensure_driver_installed
   end
 
+  def monkey_test_precondition
+    ensure_device_exists
+    ensure_app_installed
+    terminate_app
+    open_home_screen(with_tracker: true)
+    launch_app
+  end
+
   def monkey_test(gestures)
+    monkey_test_precondition
     app_elements = describe_ui.shuffle
     current_time = Time.now
-    while Time.now < current_time + duration
+    while Time.now < current_time + session_duration
       el1_coordinates = central_coordinates(app_elements.first)
       el2_coordinates = central_coordinates(app_elements.last)
       case gestures.sample
@@ -40,7 +52,30 @@ class Driver
         next
       end
       app_elements = describe_ui.shuffle
-      Logger.error('App lost') if app_elements.include?(@home_tracker)
+      next unless app_elements.include?(@home_tracker)
+
+      save_session
+      Logger.error('App lost')
+    end
+    save_session
+  end
+
+  def repeat_monkey_test
+    monkey_test_precondition
+    session_actions.each do |action|
+      case action['type']
+      when 'tap'
+        tap(coordinates: { x: action['x'], y: action['y'] })
+      when 'press'
+        press(coordinates: { x: action['x'], y: action['y'] }, duration: action['duration'])
+      when 'swipe'
+        swipe(
+          start_coordinates: { x: action['x'], y: action['y'] },
+          end_coordinates: { x: action['endX'], y: action['endY'] },
+          duration: action['duration']
+        )
+      end
+      Logger.error('App lost') if describe_ui.shuffle.include?(@home_tracker)
     end
   end
 
@@ -113,11 +148,13 @@ class Driver
 
   def tap(coordinates:)
     Logger.info('Tap:', payload: JSON.pretty_generate(coordinates))
+    @session[:actions] << { type: :tap, x: coordinates[:x], y: coordinates[:y] } unless session_actions
     `idb ui tap --udid #{udid} #{coordinates[:x]} #{coordinates[:y]}`
   end
 
   def press(coordinates:, duration:)
     Logger.info("Press (#{duration}s):", payload: JSON.pretty_generate(coordinates))
+    @session[:actions] << { type: :press, x: coordinates[:x], y: coordinates[:y], duration: duration } unless session_actions
     `idb ui tap --udid #{udid} --duration #{duration} #{coordinates[:x]} #{coordinates[:y]}`
   end
 
@@ -126,6 +163,16 @@ class Driver
       "Swipe (#{duration}s):",
       payload: "#{JSON.pretty_generate(start_coordinates)} => #{JSON.pretty_generate(end_coordinates)}"
     )
+    unless session_actions
+      @session[:actions] << {
+        type: :swipe,
+        x: start_coordinates[:x],
+        y: start_coordinates[:y],
+        endX: end_coordinates[:x],
+        endY: end_coordinates[:y],
+        duration: duration
+      }
+    end
     coordinates = "#{start_coordinates[:x]} #{start_coordinates[:y]} #{end_coordinates[:x]} #{end_coordinates[:y]}"
     `idb ui swipe --udid #{udid} --duration #{duration} #{coordinates}`
   end
@@ -166,6 +213,10 @@ class Driver
 
   def press_duration
     rand(0.5..1.5).ceil(1)
+  end
+
+  def save_session
+    File.write("#{session_path}/xcmonkey-session.json", JSON.pretty_generate(@session))
   end
 
   private

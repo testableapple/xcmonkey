@@ -1,6 +1,6 @@
 describe Xcmonkey do
   describe Xcmonkey::Xcmonkey do
-    let(:params) { { udid: '123', bundle_id: 'example.com.app', duration: 10 } }
+    let(:params) { { udid: '123', bundle_id: 'example.com.app', duration: 10, session_path: Dir.pwd } }
     let(:duration_error_msg) { 'Duration must be Integer and not less than 1 second' }
 
     it 'verifies gestures' do
