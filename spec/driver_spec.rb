@@ -211,6 +211,47 @@ describe Driver do
     driver.save_session
   end
 
+  it 'verifies that monkey_test_precondition works fine' do
+    driver.monkey_test_precondition
+    app_info = driver.list_apps.split("\n").detect { |app| app =~ /#{bundle_id}.*Running/ }
+    expect(app_info).not_to be_nil
+  end
+
+  it 'verifies that monkey_test works fine' do
+    params = { udid: udid, bundle_id: bundle_id, duration: 1, session_path: Dir.pwd }
+    driver = described_class.new(params)
+    expect(driver).to receive(:monkey_test_precondition)
+    driver.monkey_test(Xcmonkey::Xcmonkey.new(params).gestures)
+    expect(driver.instance_variable_get(:@session)[:actions]).not_to be_empty
+  end
+
+  it 'verifies that repeat_monkey_test works fine' do
+    session_actions = [
+      { 'type' => 'tap', 'x' => 10, 'y' => 10 },
+      { 'type' => 'press', 'x' => 11, 'y' => 11, 'duration' => 1.4 },
+      { 'type' => 'swipe', 'x' => 12, 'y' => 12, 'endX' => 15, 'endY' => 15, 'duration' => 0.3 }
+    ]
+    driver = described_class.new(udid: udid, bundle_id: bundle_id, session_actions: session_actions)
+    allow(Logger).to receive(:info).twice
+    expect(driver).to receive(:monkey_test_precondition)
+    expect(driver).to receive(:tap).with(coordinates: { x: 10, y: 10 })
+    expect(driver).to receive(:press).with(coordinates: { x: 11, y: 11 }, duration: 1.4)
+    expect(driver).to receive(:swipe).with(start_coordinates: { x: 12, y: 12 }, end_coordinates: { x: 15, y: 15 }, duration: 0.3)
+    driver.repeat_monkey_test
+    expect(driver.instance_variable_get(:@session)[:actions]).to be_empty
+  end
+
+  it 'verifies that unknown actions does not break repeat_monkey_test' do
+    driver = described_class.new(udid: udid, bundle_id: bundle_id, session_actions: [{ 'type' => 'test', 'x' => 10, 'y' => 10 }])
+    allow(Logger).to receive(:info).twice
+    expect(driver).to receive(:monkey_test_precondition)
+    expect(driver).not_to receive(:tap)
+    expect(driver).not_to receive(:press)
+    expect(driver).not_to receive(:swipe)
+    driver.repeat_monkey_test
+    expect(driver.instance_variable_get(:@session)[:actions]).to be_empty
+  end
+
   it 'verifies that simulator was not booted' do
     driver.shutdown_simulator
     error_message = "Failed to boot #{udid}"

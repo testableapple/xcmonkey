@@ -74,6 +74,8 @@ class Driver
           end_coordinates: { x: action['endX'], y: action['endY'] },
           duration: action['duration']
         )
+      else
+        next
       end
       Logger.error('App lost') if describe_ui.shuffle.include?(@home_tracker)
     end
