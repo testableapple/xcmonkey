@@ -7,7 +7,6 @@ describe Repeater do
   let(:session_file_content_without_bundle_id) { '{ "params": {"udid": "0", "enable_simulator_keyboard": true}, "actions": [{ "type": "tap", "x": 0, "y": 0 }] }' }
   let(:session_file_content_without_udid) { '{ "params": {"bundle_id": "0", "enable_simulator_keyboard": true}, "actions": [{ "type": "tap", "x": 0, "y": 0 }] }' }
 
-  # TESTME
   it 'verifies that session cannot be validated without params' do
     allow(File).to receive(:exist?).and_return(true)
     allow(File).to receive(:read).and_return(session_file_content_without_params)
