@@ -17,10 +17,11 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      PR_NUMBER: ${{ github.event.number }}
     steps:
       - uses: actions/checkout@v3.3.0
 
-      - uses: actions/setup-python@v4.4.0
+      - uses: actions/setup-python@v4.5.0
         with:
           python-version: 3.11
           cache: 'pip'
