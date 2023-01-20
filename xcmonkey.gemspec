@@ -3,7 +3,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "xcmonkey/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = Xcmonkey::GEM_NAME
+  spec.name          = "xcmonkey"
   spec.version       = Xcmonkey::VERSION
   spec.authors       = ["alteral"]
   spec.email         = ["a.alterpesotskiy@mail.ru"]

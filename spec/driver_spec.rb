@@ -10,12 +10,6 @@ describe Driver do
     expect { driver.boot_simulator }.not_to raise_error
   end
 
-  it 'verifies that there are booted simulators' do
-    driver.boot_simulator
-    booted_simulators = driver.list_booted_simulators
-    expect(booted_simulators).not_to be_empty
-  end
-
   it 'verifies that ui can be described' do
     driver.boot_simulator
     ui = driver.describe_ui
@@ -41,8 +35,8 @@ describe Driver do
 
   it 'verifies that list of apps can be showed' do
     driver.boot_simulator
-    list_apps = driver.list_apps
-    expect(list_apps).to include(bundle_id)
+    app_exists = driver.list_apps.any? { |app| app['bundle_id'] == bundle_id }
+    expect(app_exists).to be(true)
   end
 
   it 'verifies that app installed' do
@@ -62,11 +56,11 @@ describe Driver do
   end
 
   it 'verifies that device exists' do
-    error_message = "Can't find device #{udid}"
-    payload = driver.list_targets.detect { |target| target.include?(udid) }
-    expect(Logger).not_to receive(:error).with(error_message, payload: nil)
-    expect(Logger).to receive(:info).with('Device info:', payload: payload)
+    payload = driver.list_targets.detect { |target| target['udid'] == udid }
+    expect(Logger).not_to receive(:error)
+    expect(Logger).to receive(:info).with('Device info:', payload: JSON.pretty_generate(payload))
     expect(driver).to receive(:boot_simulator)
+    expect(driver).to receive(:configure_simulator_keyboard)
     expect { driver.ensure_device_exists }.not_to raise_error
   end
 
@@ -213,15 +207,16 @@ describe Driver do
 
   it 'verifies that monkey_test_precondition works fine' do
     driver.monkey_test_precondition
-    app_info = driver.list_apps.split("\n").detect { |app| app =~ /#{bundle_id}.*Running/ }
-    expect(app_info).not_to be_nil
+    app_info = driver.list_apps.detect { |app| app['bundle_id'] == bundle_id }
+    app_is_running = app_info && app_info['process_state'] == 'Running'
+    expect(app_is_running).to be(true)
   end
 
   it 'verifies that monkey_test works fine' do
     params = { udid: udid, bundle_id: bundle_id, duration: 1, session_path: Dir.pwd }
     driver = described_class.new(params)
     expect(driver).to receive(:monkey_test_precondition)
-    driver.monkey_test(Xcmonkey::Xcmonkey.new(params).gestures)
+    driver.monkey_test(Xcmonkey.new(params).gestures)
     expect(driver.instance_variable_get(:@session)[:actions]).not_to be_empty
   end
 

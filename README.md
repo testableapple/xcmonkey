@@ -39,10 +39,32 @@ gem 'xcmonkey'
 ### To run a stress test
 
 ```bash
-$ xcmonkey test --udid "413EA256-CFFB-4312-94A6-12592BEE4CBA" --bundle-id "com.apple.Maps" --duration 100
-12:44:19.343: Device info: iPhone 14 Pro | 413EA256-CFFB-4312-94A6-12592BEE4CBA | Booted | simulator | iOS 16.2 | x86_64 | /tmp/idb/413EA256-CFFB-4312-94A6-12592BEE4CBA_companion.sock
+xcmonkey test --udid "413EA256-CFFB-4312-94A6-12592BEE4CBA" --bundle-id "com.apple.Maps" --duration 100
 
-12:44:22.550: App info: com.apple.Maps | Maps | system | arm64, x86_64 | Running | Not Debuggable | pid=74636
+12:44:19.343: Device info: {
+  "name": "iPhone 14 Pro",
+  "udid": "413EA256-CFFB-4312-94A6-12592BEE4CBA",
+  "state": "Booted",
+  "type": "simulator",
+  "os_version": "iOS 16.2",
+  "architecture": "x86_64",
+  "path": "/tmp/idb/413EA256-CFFB-4312-94A6-12592BEE4CBA_companion.sock",
+  "is_local": true,
+  "companion": "/tmp/idb/413EA256-CFFB-4312-94A6-12592BEE4CBA_companion.sock"
+}
+
+12:44:22.550: App info: {
+  "bundle_id": "com.apple.Maps",
+  "name": "Maps",
+  "install_type": "system",
+  "architectures": [
+    "x86_64",
+    "arm64"
+  ],
+  "process_state": "Running",
+  "debuggable": false,
+  "pid": "49186"
+}
 
 12:44:23.203: Tap: {
   "x": 53,
@@ -66,59 +88,29 @@ $ xcmonkey test --udid "413EA256-CFFB-4312-94A6-12592BEE4CBA" --bundle-id "com.a
 ### To repeat the stress test from generated session
 
 ```bash
-$ xcmonkey repeat --session-path "./xcmonkey-session.json"
-12:48:13.333: Device info: iPhone 14 Pro | 413EA256-CFFB-4312-94A6-12592BEE4CBA | Booted | simulator | iOS 16.2 | x86_64 | /tmp/idb/413EA256-CFFB-4312-94A6-12592BEE4CBA_companion.sock
-
-12:48:16.542: App info: com.apple.Maps | Maps | system | arm64, x86_64 | Running | Not Debuggable | pid=73416
-
-12:48:20.195: Tap: {
-  "x": 53,
-  "y": 749
-}
-
-12:48:20.404: Swipe (0.5s): {
-  "x": 196,
-  "y": 426
-} => {
-  "x": 143,
-  "y": 447
-}
-
-12:48:21.155: Press (1.2s): {
-  "x": 143,
-  "y": 323
-}
+xcmonkey repeat --session-path "./xcmonkey-session.json"
 ```
 
 ### To describe the required point
 
 ```bash
-$ xcmonkey describe -x 20 -y 625 --udid "413EA256-CFFB-4312-94A6-12592BEE4CBA"
-20:05:20.212: Device info: iPhone 14 Pro | 413EA256-CFFB-4312-94A6-12592BEE4CBA | Booted | simulator | iOS 16.2 | x86_64 | /tmp/idb/413EA256-CFFB-4312-94A6-12592BEE4CBA_companion.sock
+xcmonkey describe -x 20 -y 625 --udid "413EA256-CFFB-4312-94A6-12592BEE4CBA"
+```
 
-20:05:21.713: x:20 y:625 point info: {
-  "AXFrame": "{{19, 624.3}, {86, 130.6}}",
-  "AXUniqueId": "ShortcutsRowCell",
-  "frame": {
-    "y": 624.3,
-    "x": 19,
-    "width": 86,
-    "height": 130.6
-  },
-  "role_description": "button",
-  "AXLabel": "Home",
-  "content_required": false,
-  "type": "Button",
-  "title": null,
-  "help": null,
-  "custom_actions": [
+## [fastlane](https://github.com/fastlane/fastlane) integration
 
-  ],
-  "AXValue": "Add",
-  "enabled": true,
-  "role": "AXButton",
-  "subrole": null
-}
+To run *xcmonkey* from *fastlane*, add the following code to your `Fastfile`:
+
+```ruby
+require 'xcmonkey'
+
+lane :test do
+  Xcmonkey.new(
+    udid: '413EA256-CFFB-4312-94A6-12592BEE4CBA',
+    bundle_id: 'com.apple.Maps',
+    duration: 100
+  ).run
+end
 ```
 
 ## Code of Conduct
