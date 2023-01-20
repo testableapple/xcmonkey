@@ -8,7 +8,7 @@ require_relative '../lib/xcmonkey/logger'
 require_relative '../lib/xcmonkey/driver'
 require_relative '../lib/xcmonkey/version'
 
-module Xcmonkey
+class Xcmonkey
   program :version, VERSION
   program :description, 'xcmonkey is a tool for doing randomised UI testing of iOS apps'
 
@@ -21,11 +21,6 @@ module Xcmonkey
     c.option('-k', '--enable-simulator-keyboard', 'Should simulator keyboard be enabled? Defaults to `true`')
     c.option('-s', '--session-path STRING', String, 'Path where monkey testing session should be saved. Defaults to current directory')
     c.action do |_, options|
-      options.default(
-        duration: 60,
-        session_path: Dir.pwd,
-        enable_simulator_keyboard: true
-      )
       params = {
         udid: options.udid,
         bundle_id: options.bundle_id,

@@ -13,6 +13,7 @@ class Driver
   end
 
   def monkey_test_precondition
+    puts
     ensure_device_exists
     ensure_app_installed
     terminate_app
@@ -121,31 +122,29 @@ class Driver
   end
 
   def list_targets
-    @list_targets ||= `idb list-targets`.split("\n")
-    @list_targets
-  end
-
-  def list_booted_simulators
-    `idb list-targets`.split("\n").grep(/Booted/)
-  end
-
-  def ensure_app_installed
-    Logger.error("App #{bundle_id} is not installed on device #{udid}") unless list_apps.include?(bundle_id)
-  end
-
-  def ensure_device_exists
-    device = list_targets.detect { |target| target.include?(udid) }
-    Logger.error("Can't find device #{udid}") if device.nil?
-
-    Logger.info('Device info:', payload: device)
-    if device.include?('simulator')
-      configure_simulator_keyboard
-      boot_simulator
-    end
+    @targets ||= `idb list-targets --json`.split("\n").map! { |target| JSON.parse(target) }
+    @targets
   end
 
   def list_apps
-    `idb list-apps --udid #{udid}`
+    `idb list-apps --udid #{udid} --json`.split("\n").map! { |app| JSON.parse(app) }
+  end
+
+  def ensure_app_installed
+    return if list_apps.any? { |app| app['bundle_id'] == bundle_id }
+
+    Logger.error("App #{bundle_id} is not installed on device #{udid}")
+  end
+
+  def ensure_device_exists
+    device = list_targets.detect { |target| target['udid'] == udid }
+    Logger.error("Can't find device #{udid}") if device.nil?
+
+    Logger.info('Device info:', payload: JSON.pretty_generate(device))
+    if device['type'] == 'simulator'
+      configure_simulator_keyboard
+      boot_simulator
+    end
   end
 
   def tap(coordinates:)
@@ -236,14 +235,13 @@ class Driver
   end
 
   def wait_until_app_launched
-    app_info = nil
+    app_is_running = false
     current_time = Time.now
-    while app_info.nil? && Time.now < current_time + 5
-      app_info = list_apps.split("\n").detect do |app|
-        app =~ /#{bundle_id}.*Running/
-      end
+    while !app_is_running && Time.now < current_time + 5
+      app_info = list_apps.detect { |app| app['bundle_id'] == bundle_id }
+      app_is_running = app_info && app_info['process_state'] == 'Running'
     end
-    Logger.error("Can't run the app #{bundle_id}") if app_info.nil?
-    Logger.info('App info:', payload: app_info)
+    Logger.error("Can't run the app #{bundle_id}") unless app_is_running
+    Logger.info('App info:', payload: JSON.pretty_generate(app_info))
   end
 end

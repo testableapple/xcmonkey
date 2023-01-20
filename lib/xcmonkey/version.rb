@@ -1,4 +1,3 @@
-module Xcmonkey
-  VERSION = '1.0.0'
-  GEM_NAME = 'xcmonkey'
+class Xcmonkey
+  VERSION = '1.1.0'
 end
