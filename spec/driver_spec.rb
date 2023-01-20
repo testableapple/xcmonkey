@@ -4,6 +4,10 @@ describe Driver do
   let(:driver) { described_class.new(udid: udid, bundle_id: bundle_id, session_path: Dir.pwd) }
   let(:driver_with_session) { described_class.new(udid: udid, bundle_id: bundle_id, session_actions: [{ type: 'tap', x: 0, y: 0 }]) }
 
+  before do
+    allow(Logger).to receive(:info)
+  end
+
   it 'verifies that sumulator was booted' do
     error_message = "Failed to boot #{udid}"
     expect(Logger).not_to receive(:error).with(error_message, payload: nil)
@@ -14,18 +18,6 @@ describe Driver do
     driver.boot_simulator
     ui = driver.describe_ui
     expect(ui).not_to be_empty
-  end
-
-  it 'verifies that home screen can be opened' do
-    driver.boot_simulator
-    home_tracker = driver.open_home_screen(with_tracker: true)
-    expect(home_tracker).not_to be_empty
-  end
-
-  it 'verifies that home screen can be opened without tracker' do
-    driver.boot_simulator
-    home_tracker = driver.open_home_screen(with_tracker: false)
-    expect(home_tracker).to be_nil
   end
 
   it 'verifies that list of targets can be showed' do
@@ -56,9 +48,7 @@ describe Driver do
   end
 
   it 'verifies that device exists' do
-    payload = driver.list_targets.detect { |target| target['udid'] == udid }
     expect(Logger).not_to receive(:error)
-    expect(Logger).to receive(:info).with('Device info:', payload: JSON.pretty_generate(payload))
     expect(driver).to receive(:boot_simulator)
     expect(driver).to receive(:configure_simulator_keyboard)
     expect { driver.ensure_device_exists }.not_to raise_error
@@ -137,18 +127,25 @@ describe Driver do
     expect(keyboard_state.first).to include('1')
   end
 
-  it 'verifies that app can be launched' do
+  it 'verifies that app can be launched with waiting' do
     expect(Logger).not_to receive(:error)
-    expect(Logger).to receive(:info)
+    expect(driver).to receive(:wait_until_app_launched)
     driver.boot_simulator
-    driver.terminate_app
-    expect { driver.launch_app }.not_to raise_error
+    driver.terminate_app(bundle_id)
+    expect { driver.launch_app(target_bundle_id: bundle_id, wait_for_state_update: true) }.not_to raise_error
+  end
+
+  it 'verifies that app can be launched without waiting' do
+    expect(Logger).not_to receive(:error)
+    expect(driver).not_to receive(:wait_until_app_launched)
+    driver.boot_simulator
+    driver.terminate_app(bundle_id)
+    expect { driver.launch_app(target_bundle_id: bundle_id) }.not_to raise_error
   end
 
   it 'verifies tap in new session' do
     driver.boot_simulator
     coordinates = { x: 1, y: 1 }
-    expect(Logger).to receive(:info).with('Tap:', payload: JSON.pretty_generate(coordinates))
     driver.tap(coordinates: coordinates)
     expect(driver.instance_variable_get(:@session)[:actions]).not_to be_empty
   end
@@ -156,7 +153,6 @@ describe Driver do
   it 'verifies tap in old session' do
     driver_with_session.boot_simulator
     coordinates = { x: 1, y: 1 }
-    expect(Logger).to receive(:info).with('Tap:', payload: JSON.pretty_generate(coordinates))
     driver_with_session.tap(coordinates: coordinates)
     expect(driver_with_session.instance_variable_get(:@session)[:actions]).to be_empty
   end
@@ -165,7 +161,6 @@ describe Driver do
     driver.boot_simulator
     duration = 0.5
     coordinates = { x: 1, y: 1 }
-    expect(Logger).to receive(:info).with("Press (#{duration}s):", payload: JSON.pretty_generate(coordinates))
     driver.press(coordinates: coordinates, duration: duration)
     expect(driver.instance_variable_get(:@session)[:actions]).not_to be_empty
   end
@@ -174,7 +169,6 @@ describe Driver do
     driver_with_session.boot_simulator
     duration = 0.5
     coordinates = { x: 1, y: 1 }
-    expect(Logger).to receive(:info).with("Press (#{duration}s):", payload: JSON.pretty_generate(coordinates))
     driver_with_session.press(coordinates: coordinates, duration: duration)
     expect(driver_with_session.instance_variable_get(:@session)[:actions]).to be_empty
   end
@@ -184,7 +178,6 @@ describe Driver do
     duration = 0.5
     start_coordinates = { x: 1, y: 1 }
     end_coordinates = { x: 2, y: 2 }
-    expect(Logger).to receive(:info).with("Swipe (#{duration}s):", payload: "#{JSON.pretty_generate(start_coordinates)} => #{JSON.pretty_generate(end_coordinates)}")
     driver.swipe(start_coordinates: start_coordinates, end_coordinates: end_coordinates, duration: duration)
     expect(driver.instance_variable_get(:@session)[:actions]).not_to be_empty
   end
@@ -194,7 +187,6 @@ describe Driver do
     duration = 0.5
     start_coordinates = { x: 1, y: 1 }
     end_coordinates = { x: 2, y: 2 }
-    expect(Logger).to receive(:info).with("Swipe (#{duration}s):", payload: "#{JSON.pretty_generate(start_coordinates)} => #{JSON.pretty_generate(end_coordinates)}")
     driver_with_session.swipe(start_coordinates: start_coordinates, end_coordinates: end_coordinates, duration: duration)
     expect(driver_with_session.instance_variable_get(:@session)[:actions]).to be_empty
   end
@@ -210,12 +202,12 @@ describe Driver do
     app_info = driver.list_apps.detect { |app| app['bundle_id'] == bundle_id }
     app_is_running = app_info && app_info['process_state'] == 'Running'
     expect(app_is_running).to be(true)
+    expect(driver.instance_variable_get(:@running_apps)).not_to be_nil
   end
 
   it 'verifies that monkey_test works fine' do
     params = { udid: udid, bundle_id: bundle_id, duration: 1, session_path: Dir.pwd }
     driver = described_class.new(params)
-    expect(driver).to receive(:monkey_test_precondition)
     driver.monkey_test(Xcmonkey.new(params).gestures)
     expect(driver.instance_variable_get(:@session)[:actions]).not_to be_empty
   end
@@ -227,8 +219,6 @@ describe Driver do
       { 'type' => 'swipe', 'x' => 12, 'y' => 12, 'endX' => 15, 'endY' => 15, 'duration' => 0.3 }
     ]
     driver = described_class.new(udid: udid, bundle_id: bundle_id, session_actions: session_actions)
-    allow(Logger).to receive(:info).twice
-    expect(driver).to receive(:monkey_test_precondition)
     expect(driver).to receive(:tap).with(coordinates: { x: 10, y: 10 })
     expect(driver).to receive(:press).with(coordinates: { x: 11, y: 11 }, duration: 1.4)
     expect(driver).to receive(:swipe).with(start_coordinates: { x: 12, y: 12 }, end_coordinates: { x: 15, y: 15 }, duration: 0.3)
@@ -238,13 +228,65 @@ describe Driver do
 
   it 'verifies that unknown actions does not break repeat_monkey_test' do
     driver = described_class.new(udid: udid, bundle_id: bundle_id, session_actions: [{ 'type' => 'test', 'x' => 10, 'y' => 10 }])
-    allow(Logger).to receive(:info).twice
     expect(driver).to receive(:monkey_test_precondition)
     expect(driver).not_to receive(:tap)
     expect(driver).not_to receive(:press)
     expect(driver).not_to receive(:swipe)
     driver.repeat_monkey_test
     expect(driver.instance_variable_get(:@session)[:actions]).to be_empty
+  end
+
+  it 'verifies that running apps are tracked' do
+    new_app_bundle_id = 'com.apple.Preferences'
+    driver.terminate_app(new_app_bundle_id)
+    driver.monkey_test_precondition
+    driver.launch_app(target_bundle_id: new_app_bundle_id, wait_for_state_update: true)
+    expect(driver).to receive(:launch_app).with(target_bundle_id: bundle_id)
+    expect(driver).to receive(:terminate_app).with(new_app_bundle_id)
+    driver.track_running_apps
+  end
+
+  it 'verifies that running apps can be determined' do
+    driver.terminate_app(bundle_id)
+    sum = driver.list_running_apps.size
+    driver.launch_app(target_bundle_id: bundle_id)
+    expect(driver.list_running_apps.size).to eq(sum + 1)
+  end
+
+  it 'verifies that app state change can be determined' do
+    driver.launch_app(target_bundle_id: bundle_id)
+    allow(driver).to receive(:detect_app_in_background).and_return(true)
+    expect(driver).not_to receive(:save_session)
+    expect(driver).to receive(:launch_app)
+    expect { driver.detect_app_state_change }.not_to raise_error
+  end
+
+  it 'verifies that background is the invalid app state' do
+    driver.terminate_app(bundle_id)
+    expect(driver).to receive(:save_session)
+    expect { driver.detect_app_state_change }.to raise_error(SystemExit) { |e| expect(e.status).to eq(1) }
+  end
+
+  it 'verifies that foreground is the valid app state' do
+    driver.launch_app(target_bundle_id: bundle_id, wait_for_state_update: true)
+    expect { driver.detect_app_state_change }.not_to raise_error
+  end
+
+  it 'verifies that background state can be determined' do
+    driver.terminate_app(bundle_id)
+    expect(driver.detect_app_in_background).to be(true)
+  end
+
+  it 'verifies that foregroung state can be determined' do
+    driver.monkey_test_precondition
+    expect(driver.detect_app_in_background).to be(false)
+  end
+
+  it 'verifies that xcmonkey behaves as expected on real devices' do
+    udid = '1234-5678'
+    driver = described_class.new(udid: udid, bundle_id: bundle_id)
+    allow(driver).to receive(:list_targets).and_return([{ 'udid' => udid, 'type' => 'device' }])
+    expect { driver.ensure_device_exists }.to raise_error(SystemExit) { |e| expect(e.status).to eq(1) }
   end
 
   it 'verifies that simulator was not booted' do
