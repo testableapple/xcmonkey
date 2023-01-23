@@ -2,6 +2,10 @@ describe Xcmonkey do
   let(:params) { { udid: '123', bundle_id: 'example.com.app', duration: 10, session_path: Dir.pwd } }
   let(:duration_error_msg) { 'Duration must be Integer and not less than 1 second' }
 
+  before do
+    allow(Logger).to receive(:info)
+  end
+
   it 'verifies gestures' do
     gestures = described_class.new(params).gestures
     taps = [:precise_tap, :blind_tap] * 10

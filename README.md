@@ -39,7 +39,7 @@ gem 'xcmonkey'
 ### To run a stress test
 
 ```bash
-xcmonkey test --udid "413EA256-CFFB-4312-94A6-12592BEE4CBA" --bundle-id "com.apple.Maps" --duration 100
+$ xcmonkey test --duration 100 --bundle-id "com.apple.Maps" --udid "413EA256-CFFB-4312-94A6-12592BEE4CBA"
 
 12:44:19.343: Device info: {
   "name": "iPhone 14 Pro",
@@ -106,9 +106,9 @@ require 'xcmonkey'
 
 lane :test do
   Xcmonkey.new(
-    udid: '413EA256-CFFB-4312-94A6-12592BEE4CBA',
+    duration: 100,
     bundle_id: 'com.apple.Maps',
-    duration: 100
+    udid: '413EA256-CFFB-4312-94A6-12592BEE4CBA'
   ).run
 end
 ```

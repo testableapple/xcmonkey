@@ -2,15 +2,17 @@ describe Describer do
   let(:udid) { `xcrun simctl list | grep " iPhone 14 Pro Max"`.split("\n")[0].split('(')[1].split(')')[0] }
   let(:driver) { Driver.new(udid: udid) }
 
-  it 'verifies that point can be described (integer)' do
+  before do
     allow(Logger).to receive(:info)
+  end
+
+  it 'verifies that point can be described (integer)' do
     driver.boot_simulator
     point_info = described_class.new(udid: udid, x: 10, y: 10).run
     expect(point_info).not_to be_empty
   end
 
   it 'verifies that point can be described (string)' do
-    allow(Logger).to receive(:info)
     driver.boot_simulator
     point_info = described_class.new(udid: udid, x: '10', y: '10').run
     expect(point_info).not_to be_empty
