@@ -10,7 +10,7 @@ lane :release do
     api_token: ENV.fetch("GITHUB_TOKEN", nil),
     name: version,
     tag_name: version,
-    description: "See [CHANGELOG.md](https://github.com/alteral/xcmonkey/blob/main/CHANGELOG.md##{version.delete('.')}})",
+    description: "See [CHANGELOG.md](https://github.com/alteral/xcmonkey/blob/main/CHANGELOG.md##{version.delete('.')})",
     commitish: git_branch,
     upload_assets: [gem_path]
   )
