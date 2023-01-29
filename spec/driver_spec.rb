@@ -1,7 +1,7 @@
 describe Driver do
   let(:udid) { `xcrun simctl list | grep " iPhone 14 Pro Max"`.split("\n")[0].split('(')[1].split(')')[0] }
   let(:bundle_id) { 'com.apple.Maps' }
-  let(:driver) { described_class.new(udid: udid, bundle_id: bundle_id, session_path: Dir.pwd) }
+  let(:driver) { described_class.new(udid: udid, bundle_id: bundle_id) }
   let(:driver_with_session) { described_class.new(udid: udid, bundle_id: bundle_id, session_actions: [{ type: 'tap', x: 0, y: 0 }]) }
 
   before do
@@ -109,7 +109,7 @@ describe Driver do
 
   it 'verifies that simulator keyboard can be enabled' do
     allow(driver).to receive(:is_simulator_keyboard_enabled?).and_return(false)
-    driver = described_class.new(udid: udid, bundle_id: bundle_id, enable_simulator_keyboard: true)
+    driver = described_class.new(udid: udid, bundle_id: bundle_id, disable_simulator_keyboard: false)
     expect(driver).to receive(:shutdown_simulator)
     driver.configure_simulator_keyboard
     keyboard_state = `defaults read com.apple.iphonesimulator`.split("\n").grep(/ConnectHardwareKeyboard/)
@@ -119,7 +119,7 @@ describe Driver do
 
   it 'verifies that simulator keyboard can be disabled' do
     allow(driver).to receive(:is_simulator_keyboard_enabled?).and_return(true)
-    driver = described_class.new(udid: udid, bundle_id: bundle_id, enable_simulator_keyboard: false)
+    driver = described_class.new(udid: udid, bundle_id: bundle_id, disable_simulator_keyboard: true)
     expect(driver).to receive(:shutdown_simulator)
     driver.configure_simulator_keyboard
     keyboard_state = `defaults read com.apple.iphonesimulator`.split("\n").grep(/ConnectHardwareKeyboard/)
@@ -192,8 +192,14 @@ describe Driver do
   end
 
   it 'verifies that session can be saved' do
+    driver = described_class.new(udid: udid, bundle_id: bundle_id, session_path: Dir.pwd)
     expect(File).to receive(:write)
     driver.instance_variable_set(:@session, { params: {}, actions: [] })
+    driver.save_session
+  end
+
+  it "verifies that session won't be saved if path is not provided" do
+    expect(File).not_to receive(:write)
     driver.save_session
   end
 
@@ -206,7 +212,7 @@ describe Driver do
   end
 
   it 'verifies that monkey_test works fine' do
-    params = { udid: udid, bundle_id: bundle_id, duration: 1, session_path: Dir.pwd }
+    params = { udid: udid, bundle_id: bundle_id, event_count: 1, session_path: Dir.pwd }
     driver = described_class.new(params)
     driver.monkey_test(Xcmonkey.new(params).gestures)
     expect(driver.instance_variable_get(:@session)[:actions]).not_to be_empty
@@ -272,6 +278,14 @@ describe Driver do
     expect { driver.detect_app_state_change }.not_to raise_error
   end
 
+  it 'verifies that app crashes can be ignored' do
+    driver = described_class.new(udid: udid, bundle_id: bundle_id, session_path: Dir.pwd, ignore_crashes: true)
+    driver.terminate_app(bundle_id)
+    expect(driver).not_to receive(:save_session)
+    expect(driver).to receive(:launch_app)
+    expect { driver.detect_app_state_change }.not_to raise_error
+  end
+
   it 'verifies that background state can be determined' do
     driver.terminate_app(bundle_id)
     expect(driver.detect_app_in_background).to be(true)
@@ -287,6 +301,29 @@ describe Driver do
     driver = described_class.new(udid: udid, bundle_id: bundle_id)
     allow(driver).to receive(:list_targets).and_return([{ 'udid' => udid, 'type' => 'device' }])
     expect { driver.ensure_device_exists }.to raise_error(SystemExit) { |e| expect(e.status).to eq(1) }
+  end
+
+  it 'verifies that test can be slowed down' do
+    throttle = 1000
+    driver = described_class.new(udid: udid, bundle_id: bundle_id, session_path: Dir.pwd, throttle: throttle)
+    expect(driver).to receive(:sleep).with(throttle / 1000.0)
+    driver.check_speed_limit
+  end
+
+  it 'verifies that test ignores throttle by default' do
+    expect(driver).not_to receive(:sleep)
+    driver.check_speed_limit
+  end
+
+  it 'verifies that running apps are tracked on second entry with throttle' do
+    driver = described_class.new(udid: udid, bundle_id: bundle_id, session_path: Dir.pwd, throttle: 1)
+    expect(driver).to receive(:track_running_apps)
+    driver.checkup(1)
+  end
+
+  it 'verifies that running apps are not tracked on second entry without throttle' do
+    expect(driver).not_to receive(:track_running_apps)
+    driver.checkup(1)
   end
 
   it 'verifies that simulator was not booted' do

@@ -1,6 +1,6 @@
 describe Xcmonkey do
-  let(:params) { { udid: '123', bundle_id: 'example.com.app', duration: 10, session_path: Dir.pwd } }
-  let(:duration_error_msg) { 'Duration must be Integer and not less than 1 second' }
+  let(:params) { { udid: '123', bundle_id: 'example.com.app', event_count: 10, session_path: Dir.pwd } }
+  let(:event_count_error_msg) { 'Event count must be Integer and not less than 1' }
 
   before do
     allow(Logger).to receive(:info)
@@ -12,6 +12,30 @@ describe Xcmonkey do
     swipes = [:precise_swipe, :blind_swipe] * 5
     presses = [:precise_press, :blind_press]
     expect(gestures) =~ presses + taps + swipes
+  end
+
+  it 'verifies gestures without taps' do
+    params[:exclude_taps] = true
+    gestures = described_class.new(params).gestures
+    swipes = [:precise_swipe, :blind_swipe] * 5
+    presses = [:precise_press, :blind_press]
+    expect(gestures) =~ presses + swipes
+  end
+
+  it 'verifies gestures without swipes' do
+    params[:exclude_swipes] = true
+    gestures = described_class.new(params).gestures
+    taps = [:precise_tap, :blind_tap] * 10
+    presses = [:precise_press, :blind_press]
+    expect(gestures) =~ presses + taps
+  end
+
+  it 'verifies gestures without presses' do
+    params[:exclude_presses] = true
+    gestures = described_class.new(params).gestures
+    taps = [:precise_tap, :blind_tap] * 10
+    swipes = [:precise_swipe, :blind_swipe] * 5
+    expect(gestures) =~ swipes + taps
   end
 
   it 'verifies required params' do
@@ -31,21 +55,21 @@ describe Xcmonkey do
     described_class.new(params)
   end
 
-  it 'verifies `duration` param is optional' do
-    params[:duration] = nil
+  it 'verifies `event_count` param is optional' do
+    params[:event_count] = nil
     expect(Logger).not_to receive(:error)
     described_class.new(params)
   end
 
-  it 'verifies `duration` param cannot be equal to zero' do
-    params[:duration] = 0
-    expect(Logger).to receive(:error).with(duration_error_msg)
+  it 'verifies `event_count` param cannot be equal to zero' do
+    params[:event_count] = 0
+    expect(Logger).to receive(:error).with(event_count_error_msg)
     described_class.new(params)
   end
 
-  it 'verifies `duration` param cannot be negative' do
-    params[:duration] = -1
-    expect(Logger).to receive(:error).with(duration_error_msg)
+  it 'verifies `event_count` param cannot be negative' do
+    params[:event_count] = -1
+    expect(Logger).to receive(:error).with(event_count_error_msg)
     described_class.new(params)
   end
 
