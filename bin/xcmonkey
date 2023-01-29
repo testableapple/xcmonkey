@@ -17,16 +17,26 @@ class Xcmonkey
     c.description = 'Runs monkey test'
     c.option('-u', '--udid STRING', String, 'Set device UDID')
     c.option('-b', '--bundle-id STRING', String, 'Set target bundle identifier')
-    c.option('-d', '--duration SECONDS', Integer, 'Test duration in seconds. Defaults to `60`')
-    c.option('-k', '--enable-simulator-keyboard', 'Should simulator keyboard be enabled? Defaults to `true`')
-    c.option('-s', '--session-path STRING', String, 'Path where monkey testing session should be saved. Defaults to current directory')
+    c.option('-e', '--event-count NUMBER', Integer, 'Set events count. Defaults to `60`')
+    c.option('-s', '--session-path STRING', String, 'Path where test session should be saved')
+    c.option('--throttle MILLISECONDS', Integer, 'Fixed delay between events in milliseconds. Defaults to `0`')
+    c.option('--exclude-taps', 'Exclude taps from gestures list. Defaults to `false`')
+    c.option('--exclude-swipes', 'Exclude swipes from gestures list. Defaults to `false`')
+    c.option('--exclude-presses', 'Exclude presses from gestures list. Defaults to `false`')
+    c.option('--ignore-crashes', 'Should app crashes be ignored? Defaults to `false`')
+    c.option('--disable-simulator-keyboard', 'Should simulator keyboard be disable? Defaults to `false`')
     c.action do |_, options|
       params = {
         udid: options.udid,
         bundle_id: options.bundle_id,
-        duration: options.duration,
+        event_count: options.event_count,
+        throttle: options.throttle,
         session_path: options.session_path,
-        enable_simulator_keyboard: options.enable_simulator_keyboard
+        exclude_taps: options.exclude_taps,
+        exclude_swipes: options.exclude_swipes,
+        exclude_presses: options.exclude_presses,
+        ignore_crashes: options.ignore_crashes,
+        disable_simulator_keyboard: options.disable_simulator_keyboard
       }
       Xcmonkey.new(params).run
     end

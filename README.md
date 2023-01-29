@@ -39,7 +39,7 @@ gem 'xcmonkey'
 ### To run a stress test
 
 ```bash
-$ xcmonkey test --duration 100 --bundle-id "com.apple.Maps" --udid "413EA256-CFFB-4312-94A6-12592BEE4CBA"
+$ xcmonkey test --event-count 100 --bundle-id "com.apple.Maps" --udid "413EA256-CFFB-4312-94A6-12592BEE4CBA"
 
 12:44:19.343: Device info: {
   "name": "iPhone 14 Pro",
@@ -97,6 +97,26 @@ xcmonkey repeat --session-path "./xcmonkey-session.json"
 xcmonkey describe -x 20 -y 625 --udid "413EA256-CFFB-4312-94A6-12592BEE4CBA"
 ```
 
+### Test options reference
+
+The table below lists all options you can include on the `xcmonkey test` command line.
+
+| Category | Option | Description | Default |
+| --- | --- | --- | --- |
+| **General** | `-h, --help` | Display help documentation | |
+| | `-v, --version` | Display version information | |
+| | `-t, --trace` | Display backtrace when an error occurs | |
+| **Events** | `-u, --udid <string>` | Set device UDID | |
+| | `-b, --bundle-id <string>` | Set target bundle identifier | |
+| | `-s, --session-path <string>` | Path where test session should be saved | |
+| | `-e, --event-count <integer>` | Set events count | `60` |
+| | `--exclude-taps` | Exclude taps from gestures list | `false` |
+| | `--exclude-swipes` | Exclude swipes from gestures list | `false` |
+| | `--exclude-presses` | Exclude presses from gestures list | `false` |
+| | `--disable-simulator-keyboard` | Should simulator keyboard be disable? | `false` |
+| **Debugging** | `--ignore-crashes` | Should app crashes be ignored? | `false` |
+| | `--throttle <milliseconds>` | Fixed delay between events | `0` |
+
 ## [fastlane](https://github.com/fastlane/fastlane) integration
 
 To run *xcmonkey* from *fastlane*, add the following code to your `Fastfile`:
@@ -106,7 +126,7 @@ require 'xcmonkey'
 
 lane :test do
   Xcmonkey.new(
-    duration: 100,
+    event_count: 100,
     bundle_id: 'com.apple.Maps',
     udid: '413EA256-CFFB-4312-94A6-12592BEE4CBA'
   ).run

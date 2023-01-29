@@ -1,5 +1,5 @@
 class Repeater
-  attr_accessor :udid, :bundle_id, :enable_simulator_keyboard, :actions
+  attr_accessor :udid, :bundle_id, :disable_simulator_keyboard, :ignore_crashes, :actions, :throttle
 
   def initialize(params)
     validate_session(params[:session_path])
@@ -8,8 +8,10 @@ class Repeater
   def run
     params = {
       udid: udid,
+      throttle: throttle,
       bundle_id: bundle_id,
-      enable_simulator_keyboard: enable_simulator_keyboard,
+      ignore_crashes: ignore_crashes,
+      disable_simulator_keyboard: disable_simulator_keyboard,
       session_actions: actions
     }
     Driver.new(params).repeat_monkey_test
@@ -34,6 +36,10 @@ class Repeater
     self.bundle_id = session['params']['bundle_id']
     Logger.error('Provided session is not valid: `bundle_id` should not be `nil`') if bundle_id.nil?
 
-    self.enable_simulator_keyboard = session['params']['enable_simulator_keyboard']
+    self.throttle = session['params']['throttle']
+
+    self.ignore_crashes = session['params']['ignore_crashes']
+
+    self.disable_simulator_keyboard = session['params']['disable_simulator_keyboard']
   end
 end

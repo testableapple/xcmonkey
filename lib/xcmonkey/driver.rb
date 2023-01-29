@@ -1,12 +1,14 @@
 class Driver
-  attr_accessor :udid, :bundle_id, :enable_simulator_keyboard, :session_duration, :session_path, :session_actions
+  attr_accessor :udid, :bundle_id, :disable_simulator_keyboard, :event_count, :session_path, :session_actions, :ignore_crashes, :throttle
 
   def initialize(params)
     self.udid = params[:udid]
+    self.throttle = params[:throttle]
     self.bundle_id = params[:bundle_id]
-    self.session_duration = params[:duration]
+    self.event_count = params[:event_count]
     self.session_path = params[:session_path]
-    self.enable_simulator_keyboard = params[:enable_simulator_keyboard]
+    self.ignore_crashes = params[:ignore_crashes]
+    self.disable_simulator_keyboard = params[:disable_simulator_keyboard]
     self.session_actions = params[:session_actions]
     @session = { params: params, actions: [] }
     ensure_driver_installed
@@ -23,10 +25,8 @@ class Driver
 
   def monkey_test(gestures)
     monkey_test_precondition
-    app_elements = describe_ui.shuffle
-    current_time = Time.now
-    counter = 0
-    while Time.now < current_time + session_duration
+    event_count.times do |counter|
+      app_elements = describe_ui.shuffle
       el1_coordinates = central_coordinates(app_elements.first)
       el2_coordinates = central_coordinates(app_elements.last)
       case gestures.sample
@@ -53,18 +53,14 @@ class Driver
       else
         next
       end
-      detect_app_state_change
-      track_running_apps if counter % 5 == 0 # Track running apps after every 5th action to speed up the test
-      counter += 1
-      app_elements = describe_ui.shuffle
+      checkup(counter)
     end
     save_session
   end
 
   def repeat_monkey_test
     monkey_test_precondition
-    counter = 0
-    session_actions.each do |action|
+    session_actions.each_with_index do |action, counter|
       case action['type']
       when 'tap'
         tap(coordinates: { x: action['x'], y: action['y'] })
@@ -79,10 +75,16 @@ class Driver
       else
         next
       end
-      detect_app_state_change
-      track_running_apps if counter % 5 == 0
-      counter += 1
+      checkup(counter)
     end
+  end
+
+  def checkup(counter)
+    detect_app_state_change
+    if counter % 5 == 0 || throttle.to_i > 0 # Track running apps after every 5th action
+      track_running_apps                     # (unless `throttle` was provided) to speed up the test
+    end
+    check_speed_limit
   end
 
   def describe_ui
@@ -115,7 +117,7 @@ class Driver
 
   def configure_simulator_keyboard
     shutdown_simulator
-    keyboard_status = enable_simulator_keyboard ? 0 : 1
+    keyboard_status = disable_simulator_keyboard ? 1 : 0
     `defaults write com.apple.iphonesimulator ConnectHardwareKeyboard #{keyboard_status}`
   end
 
@@ -165,10 +167,8 @@ class Driver
   end
 
   def swipe(start_coordinates:, end_coordinates:, duration:)
-    Logger.info(
-      "Swipe (#{duration}s):",
-      payload: "#{JSON.pretty_generate(start_coordinates)} => #{JSON.pretty_generate(end_coordinates)}"
-    )
+    payload = "#{JSON.pretty_generate(start_coordinates)} => #{JSON.pretty_generate(end_coordinates)}"
+    Logger.info("Swipe (#{duration}s):", payload: payload)
     unless session_actions
       @session[:actions] << {
         type: :swipe,
@@ -188,8 +188,8 @@ class Driver
     x = (frame['x'] + (frame['width'] / 2)).abs.to_i
     y = (frame['y'] + (frame['height'] / 2)).abs.to_i
     {
-      x: x > screen_size[:width].to_i ? rand(0..screen_size[:width].to_i) : x,
-      y: y > screen_size[:height].to_i ? rand(0..screen_size[:height].to_i) : y
+      x: x > screen_size[:width].to_i ? random_coordinates[:x] : x,
+      y: y > screen_size[:height].to_i ? random_coordinates[:y] : y
     }
   end
 
@@ -222,6 +222,8 @@ class Driver
   end
 
   def save_session
+    return if session_path.nil?
+
     File.write("#{session_path}/xcmonkey-session.json", JSON.pretty_generate(@session))
   end
 
@@ -236,6 +238,7 @@ class Driver
       return if new_apps.empty?
 
       launch_app(target_bundle_id: bundle_id)
+
       new_apps.each do |id|
         Logger.warn("Shutting down: #{id}")
         terminate_app(id)
@@ -249,7 +252,7 @@ class Driver
 
     target_app_is_running = list_running_apps.any? { |app| app['bundle_id'] == bundle_id }
 
-    if target_app_is_running
+    if target_app_is_running || ignore_crashes
       launch_app(target_bundle_id: bundle_id)
     else
       save_session
@@ -260,6 +263,10 @@ class Driver
   def detect_app_in_background
     current_app_label = describe_ui.detect { |el| el['type'] == 'Application' }['AXLabel']
     current_app_label.nil? || current_app_label.strip.empty?
+  end
+
+  def check_speed_limit
+    sleep(throttle / 1000.0) if throttle.to_i > 0
   end
 
   private

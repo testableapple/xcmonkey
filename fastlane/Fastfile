@@ -8,9 +8,9 @@ lane :release do
   set_github_release(
     repository_name: 'alteral/xcmonkey',
     api_token: ENV.fetch("GITHUB_TOKEN", nil),
-    name: "xcmonkey v#{version}",
-    tag_name: "v#{version}",
-    description: "v#{version}",
+    name: version,
+    tag_name: version,
+    description: "See [CHANGELOG.md](https://github.com/alteral/xcmonkey/blob/main/CHANGELOG.md##{version.delete('.')}})",
     commitish: git_branch,
     upload_assets: [gem_path]
   )
