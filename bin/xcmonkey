@@ -23,8 +23,8 @@ class Xcmonkey
     c.option('--exclude-taps', 'Exclude taps from gestures list. Defaults to `false`')
     c.option('--exclude-swipes', 'Exclude swipes from gestures list. Defaults to `false`')
     c.option('--exclude-presses', 'Exclude presses from gestures list. Defaults to `false`')
-    c.option('--ignore-crashes', 'Should app crashes be ignored? Defaults to `false`')
-    c.option('--disable-simulator-keyboard', 'Should simulator keyboard be disable? Defaults to `false`')
+    c.option('--ignore-crashes', 'Ignore app crashes. Defaults to `false`')
+    c.option('--disable-simulator-keyboard', 'Disable simulator keyboard. Defaults to `false`')
     c.action do |_, options|
       params = {
         udid: options.udid,

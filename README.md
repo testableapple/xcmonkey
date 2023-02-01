@@ -113,8 +113,8 @@ The table below lists all options you can include on the `xcmonkey test` command
 | | `--exclude-taps` | Exclude taps from gestures list | `false` |
 | | `--exclude-swipes` | Exclude swipes from gestures list | `false` |
 | | `--exclude-presses` | Exclude presses from gestures list | `false` |
-| | `--disable-simulator-keyboard` | Should simulator keyboard be disable? | `false` |
-| **Debugging** | `--ignore-crashes` | Should app crashes be ignored? | `false` |
+| | `--disable-simulator-keyboard` | Disable simulator keyboard | `false` |
+| **Debugging** | `--ignore-crashes` | Ignore app crashes | `false` |
 | | `--throttle <milliseconds>` | Fixed delay between events | `0` |
 
 ## [fastlane](https://github.com/fastlane/fastlane) integration
