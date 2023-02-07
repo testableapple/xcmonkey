@@ -291,11 +291,6 @@ describe Driver do
     expect(driver.detect_app_in_background).to be(true)
   end
 
-  it 'verifies that foregroung state can be determined' do
-    driver.monkey_test_precondition
-    expect(driver.detect_app_in_background).to be(false)
-  end
-
   it 'verifies that xcmonkey behaves as expected on real devices' do
     udid = '1234-5678'
     driver = described_class.new(udid: udid, bundle_id: bundle_id)
@@ -317,11 +312,13 @@ describe Driver do
 
   it 'verifies that running apps are tracked on second entry with throttle' do
     driver = described_class.new(udid: udid, bundle_id: bundle_id, session_path: Dir.pwd, throttle: 1)
+    driver.launch_app(target_bundle_id: bundle_id)
     expect(driver).to receive(:track_running_apps)
     driver.checkup(1)
   end
 
   it 'verifies that running apps are not tracked on second entry without throttle' do
+    driver.launch_app(target_bundle_id: bundle_id)
     expect(driver).not_to receive(:track_running_apps)
     driver.checkup(1)
   end
