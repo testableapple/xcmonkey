@@ -119,7 +119,7 @@ The table below lists all options you can include on the `xcmonkey test` command
 
 ## [fastlane](https://github.com/fastlane/fastlane) integration
 
-To get started with *xcmonkey fastlane plugin*, add it to your project by running:
+To get started with [xcmonkey fastlane plugin](https://github.com/alteral/fastlane-plugin-xcmonkey), add it to your project by running:
 
 ```bash
 fastlane add_plugin xcmonkey
@@ -128,11 +128,13 @@ fastlane add_plugin xcmonkey
 ### Usage
 
 ```ruby
-bundle_id = 'com.apple.Maps'
-device = 'iPhone 14 (16.2)'
-sim = FastlaneCore::Simulator.all.detect { |d| device == "#{d.name} (#{d.os_version})") }
+  bundle_id = 'com.apple.Maps'
+  device = 'iPhone 14'
+  sim = FastlaneCore::Simulator.all.filter { |d| d.name == device }.max_by(&:os_version)
+  udid = sim.udid
 
-xcmonkey(udid: sim.udid, bundle_id: bundle_id)
+  xcmonkey(udid: udid, bundle_id: bundle_id)
+end
 ```
 
 ## Code of Conduct
