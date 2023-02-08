@@ -56,6 +56,7 @@ class Driver
       checkup(counter)
     end
     save_session
+    terminate_app(bundle_id)
   end
 
   def repeat_monkey_test
@@ -77,6 +78,7 @@ class Driver
       end
       checkup(counter)
     end
+    terminate_app(bundle_id)
   end
 
   def checkup(counter)

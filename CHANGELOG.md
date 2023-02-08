@@ -2,6 +2,14 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.3.1](https://github.com/alteral/xcmonkey/releases/tag/1.3.1)
+
+_February 08, 2023_
+
+### ✅ Added
+
+- Terminate app after test
+
 ## [1.3.0](https://github.com/alteral/xcmonkey/releases/tag/1.3.0)
 
 _January 29, 2023_
