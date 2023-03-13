@@ -7,7 +7,10 @@ on:
       - develop
 
   pull_request:
-    types: [opened, synchronize]
+    branches:
+      - '**'
+
+  workflow_dispatch:
 
 jobs:
   chat:
