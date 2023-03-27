@@ -6,7 +6,7 @@ git_source(:github) { |repo_name| "https://github.com/#{repo_name}" }
 gemspec
 
 gem 'bundler'
-gem 'fasterer', '0.10.0'
+gem 'fasterer', '0.10.1'
 gem 'fastlane'
 gem 'rake'
 gem 'rspec'
