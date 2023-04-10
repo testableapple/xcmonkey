@@ -5,11 +5,11 @@ require 'xcmonkey/version'
 Gem::Specification.new do |spec|
   spec.name          = 'xcmonkey'
   spec.version       = Xcmonkey::VERSION
-  spec.authors       = ['alteral']
+  spec.authors       = ['testableapple']
   spec.email         = ['a.alterpesotskiy@mail.ru']
 
   spec.summary       = 'xcmonkey is a tool for doing randomised UI testing of iOS apps'
-  spec.homepage      = 'https://github.com/alteral/xcmonkey'
+  spec.homepage      = 'https://github.com/testableapple/xcmonkey'
   spec.license       = 'MIT'
 
   if spec.respond_to?(:metadata)

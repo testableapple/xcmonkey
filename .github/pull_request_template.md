@@ -2,7 +2,7 @@
 
 ## References
 
-- https://github.com/alteral/xcmonkey/issues/XXX
+- https://github.com/testableapple/xcmonkey/issues/XXX
 
 ## Description
 

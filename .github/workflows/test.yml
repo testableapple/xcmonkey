@@ -10,6 +10,10 @@ on:
     branches:
       - '**'
 
+  schedule:
+    # Runs "At 03:33 on Saturday"
+    - cron: '33 3 * * 6'
+
   workflow_dispatch:
 
 jobs:

@@ -3,8 +3,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/alteral/xcmonkey/actions"><img src="https://github.com/alteral/xcmonkey/actions/workflows/test.yml/badge.svg" /></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=alteral_xcmonkey"><img src="https://sonarcloud.io/api/project_badges/measure?project=alteral_xcmonkey&metric=coverage" /></a>
+  <a href="https://github.com/testableapple/xcmonkey/actions"><img src="https://github.com/testableapple/xcmonkey/actions/workflows/test.yml/badge.svg" /></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=testableapple_xcmonkey"><img src="https://sonarcloud.io/api/project_badges/measure?project=testableapple_xcmonkey&metric=coverage" /></a>
   <a href="https://rubygems.org/gems/xcmonkey"><img src="https://img.shields.io/gem/v/xcmonkey.svg?style=flat" /></a>
   <a href="/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg?style=flat" /></a>
 </p>
@@ -119,7 +119,7 @@ The table below lists all options you can include on the `xcmonkey test` command
 
 ## [fastlane](https://github.com/fastlane/fastlane) integration
 
-To get started with [xcmonkey fastlane plugin](https://github.com/alteral/fastlane-plugin-xcmonkey), add it to your project by running:
+To get started with [xcmonkey fastlane plugin](https://github.com/testableapple/fastlane-plugin-xcmonkey), add it to your project by running:
 
 ```bash
 fastlane add_plugin xcmonkey

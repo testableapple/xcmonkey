@@ -152,7 +152,7 @@ class Driver
       boot_simulator
     else
       Logger.error('xcmonkey does not support real devices yet. ' \
-                   'For more information see https://github.com/alteral/xcmonkey/issues/7')
+                   'For more information see https://github.com/testableapple/xcmonkey/issues/7')
     end
   end
 

@@ -6,11 +6,11 @@ lane :release do
   gem_path = "pkg/xcmonkey-#{version}.gem"
   sh("gem push ../#{gem_path}")
   set_github_release(
-    repository_name: 'alteral/xcmonkey',
+    repository_name: 'testableapple/xcmonkey',
     api_token: ENV.fetch("GITHUB_TOKEN", nil),
     name: version,
     tag_name: version,
-    description: "See [CHANGELOG.md](https://github.com/alteral/xcmonkey/blob/main/CHANGELOG.md##{version.delete('.')})",
+    description: "See [CHANGELOG.md](https://github.com/testableapple/xcmonkey/blob/main/CHANGELOG.md##{version.delete('.')})",
     commitish: git_branch,
     upload_assets: [gem_path]
   )
