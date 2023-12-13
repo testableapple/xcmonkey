@@ -128,6 +128,7 @@ fastlane add_plugin xcmonkey
 ### Usage
 
 ```ruby
+lane :monkey_test do
   bundle_id = 'com.apple.Maps'
   device = 'iPhone 14'
   sim = FastlaneCore::Simulator.all.filter { |d| d.name == device }.max_by(&:os_version)
