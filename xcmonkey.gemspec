@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = '>= 2.4'
 
-  spec.add_dependency('colorize', '~> 0.8.1')
+  spec.add_dependency('colorize', '>= 0.8.1', '< 1.1.0')
   spec.add_dependency('commander')
 
   spec.metadata['rubygems_mfa_required'] = 'true'
