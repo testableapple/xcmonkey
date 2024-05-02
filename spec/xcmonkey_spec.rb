@@ -11,7 +11,7 @@ describe Xcmonkey do
     taps = [:precise_tap, :blind_tap] * 10
     swipes = [:precise_swipe, :blind_swipe] * 5
     presses = [:precise_press, :blind_press]
-    expect(gestures) =~ presses + taps + swipes
+    expect(gestures).to match_array(presses + taps + swipes)
   end
 
   it 'verifies gestures without taps' do
@@ -19,7 +19,7 @@ describe Xcmonkey do
     gestures = described_class.new(params).gestures
     swipes = [:precise_swipe, :blind_swipe] * 5
     presses = [:precise_press, :blind_press]
-    expect(gestures) =~ presses + swipes
+    expect(gestures).to match_array(presses + swipes)
   end
 
   it 'verifies gestures without swipes' do
@@ -27,7 +27,7 @@ describe Xcmonkey do
     gestures = described_class.new(params).gestures
     taps = [:precise_tap, :blind_tap] * 10
     presses = [:precise_press, :blind_press]
-    expect(gestures) =~ presses + taps
+    expect(gestures).to match_array(presses + taps)
   end
 
   it 'verifies gestures without presses' do
@@ -35,7 +35,7 @@ describe Xcmonkey do
     gestures = described_class.new(params).gestures
     taps = [:precise_tap, :blind_tap] * 10
     swipes = [:precise_swipe, :blind_swipe] * 5
-    expect(gestures) =~ swipes + taps
+    expect(gestures).to match_array(swipes + taps)
   end
 
   it 'verifies required params' do

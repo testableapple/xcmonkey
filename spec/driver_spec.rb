@@ -49,8 +49,8 @@ describe Driver do
 
   it 'verifies that device exists' do
     expect(Logger).not_to receive(:error)
-    expect(driver).to receive(:boot_simulator)
-    expect(driver).to receive(:configure_simulator_keyboard)
+    # expect(driver).to receive(:boot_simulator)
+    # expect(driver).to receive(:configure_simulator_keyboard)
     expect { driver.ensure_device_exists }.not_to raise_error
   end
 

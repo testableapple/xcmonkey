@@ -148,8 +148,8 @@ class Driver
 
     Logger.info('Device info:', payload: JSON.pretty_generate(device))
     if device['type'] == 'simulator'
-      configure_simulator_keyboard
-      boot_simulator
+      # configure_simulator_keyboard
+      # boot_simulator
     else
       Logger.error('xcmonkey does not support real devices yet. ' \
                    'For more information see https://github.com/testableapple/xcmonkey/issues/7')
